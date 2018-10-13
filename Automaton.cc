@@ -85,6 +85,7 @@ void fa::Automaton::setStateInitial(int state) {
         this->stateCollection.find(state)->second.setInitial(true);
     } else {
         std::cerr << "Error: the state doesn't exist." << std::endl;
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -92,9 +93,8 @@ bool fa::Automaton::isStateInitial(int state) const {
     if (hasState(state)) {
         return this->stateCollection.find(state)->second.isInitial();
     }
-
     std::cerr << "Error: the state doesn't exist." << std::endl;
-    exit(1);
+    exit(EXIT_FAILURE);
 }
 
 void fa::Automaton::setStateFinal(int state) {
@@ -102,6 +102,7 @@ void fa::Automaton::setStateFinal(int state) {
         this->stateCollection.find(state)->second.setFinal(true);
     } else {
         std::cerr << "Error: the state doesn't exist." << std::endl;
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -126,12 +127,14 @@ bool fa::Automaton::hasTransition(int from, char alpha, int to) const {
 
     auto it = this->transitionCollection.find(Transition(&cFrom, alpha, &cTo));
     return it != this->transitionCollection.end();
-    }
+}
 
 void fa::Automaton::addTransition(int from, char alpha, int to) {
-    if (hasTransition(from, alpha, to))
+    if (hasTransition(from, alpha, to)) {
         std::cout << "Warning: the transition {stateFrom=" << from << "; alpha=" << alpha << "; stateTo=" << to
                   << "} already exist." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     addToAlphabet(alpha);
     fa::Transition data(&stateCollection.find(from)->second, alpha, &stateCollection.find(to)->second);
@@ -144,9 +147,11 @@ void fa::Automaton::addToAlphabet(char alpha) {
 }
 
 void fa::Automaton::removeTransition(int from, char alpha, int to) {
-    if (!hasTransition(from, alpha, to))
+    if (!hasTransition(from, alpha, to)) {
         std::cout << "Error: the transition {stateFrom=" << from << "; alpha=" << alpha << "; stateTo=" << to
                   << "} doesn't exist." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     fa::Transition data(&stateCollection.find(from)->second, alpha, &stateCollection.find(to)->second);
 
@@ -193,27 +198,96 @@ void fa::Automaton::prettyPrint(std::ostream &os) const {
     }
 
     os << "\n\nFinal states: " << std::endl << "\t";
-    for (auto data : finalState){
+    for (auto data : finalState) {
         os << data << ' ';
     }
 
     os << "\n\nTransitions:";
     auto it1 = transition.begin();
-    while(it1 != transition.end()){
+    while (it1 != transition.end()) {
         os << "\n\tFor state " << it1->first;
 
         auto it2 = it1->second.begin();
-        while(it2 != it1->second.end()){
+        while (it2 != it1->second.end()) {
             os << "\n\t\tFor letter " << it2->first << ":  ";
 
-            for(auto data : it2->second){
+            for (auto data : it2->second) {
                 os << data << "  ";
             }
             ++it2;
         }
         ++it1;
     }
+
+    os << std::endl;
 }
+
+void fa::Automaton::dotPrint(std::ostream &os) const {
+    std::set<int> initialState;
+    std::set<int> finalState;
+    std::map<int, std::map<char, std::set<int>>> transition;
+
+    for (auto data : this->transitionCollection) {
+
+        fa::StateConfiguration *to = data.getTo();
+        fa::StateConfiguration *from = data.getFrom();
+
+        if (to->isInitial())
+            initialState.insert(to->getState());
+
+        if (from->isInitial())
+            initialState.insert(from->getState());
+
+        if (to->isFinal())
+            finalState.insert(to->getState());
+
+        if (from->isFinal())
+            finalState.insert(from->getState());
+
+        transition[from->getState()][data.getTransition_name()].insert(to->getState());
+    }
+
+    os << "digraph automaton{\n\trankdir=LR;\n\tnode[shape = point, color=white, fontcolor=white];";
+
+    for (auto data : initialState) {
+        os << " start" << data << ' ';
+    }
+
+
+    os << ";\n\tnode [shape = doublecircle, color=black, fontcolor=black];";
+    for (auto data : finalState) {
+        os << ' ' << data;
+    }
+
+
+
+    os << ';' << std::endl << "\tnode [shape = circle];\n";
+
+
+    auto it1 = transition.begin();
+    std::set<int>  exist;
+    while (it1 != transition.end()) {
+        auto it2 = it1->second.begin();
+        while (it2 != it1->second.end()) {
+            for (auto data : it2->second) {
+                os << '\t';
+                if(initialState.find(it1->first) != initialState.end() && exist.find(it1->first) == exist.end()){
+                    os << "start" << it1->first << "->" << it1->first << ';' << std::endl << '\t';
+                    exist.insert(it1->first);
+                }
+                os << it1->first << "->";
+                os << data << "  ";
+                os << "[ label = " << it2->first << " ];" << std::endl;
+            }
+            ++it2;
+        }
+        ++it1;
+    }
+
+    os << '}';
+}
+
+
 
 //******************************************************************
 //                          Comparator

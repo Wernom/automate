@@ -36,7 +36,6 @@ namespace fa {
 
     };
 
-
     /**
      * Comparator for StateConfiguration class.
      */
@@ -117,7 +116,7 @@ namespace fa {
         bool hasState(int state) const;
 
         /**
-         * Tell if the  state are present in the automaton.
+         * Tell if the 2 state are present in the automaton.
          *
          * @param from One of the state to check in the automaton
          * @param to One of the state to check in the automaton
@@ -230,11 +229,16 @@ namespace fa {
          */
         std::size_t getAlphabetSize() const;
 
-
         /**
          * Print  the  automaton  in a friendly  way
          */
         void prettyPrint(std::ostream &os) const;
+
+        /**
+         * Print  the  automaton  with  respect  to the  DOT
+         * specification
+         */
+        void dotPrint(std:: ostream& os) const;
     };
 }
 
