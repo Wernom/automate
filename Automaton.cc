@@ -259,19 +259,16 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
         os << ' ' << data;
     }
 
-
-
     os << ';' << std::endl << "\tnode [shape = circle];\n";
 
-
     auto it1 = transition.begin();
-    std::set<int>  exist;
+    std::set<int> exist;
     while (it1 != transition.end()) {
         auto it2 = it1->second.begin();
         while (it2 != it1->second.end()) {
             for (auto data : it2->second) {
                 os << '\t';
-                if(initialState.find(it1->first) != initialState.end() && exist.find(it1->first) == exist.end()){
+                if (initialState.find(it1->first) != initialState.end() && exist.find(it1->first) == exist.end()) {
                     os << "start" << it1->first << "->" << it1->first << ';' << std::endl << '\t';
                     exist.insert(it1->first);
                 }
@@ -285,6 +282,29 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
     }
 
     os << '}';
+}
+
+const std::set<fa::Transition, fa::TransitionComparator> &fa::Automaton::getTransitionCollection() const {
+    return transitionCollection;
+}
+
+
+bool fa::Automaton::isDeterministic() const {
+    char beforeTransitionName = (char) NULL;
+    int beforeState = (int) NULL;
+
+    for (Transition data : this->transitionCollection) {
+        if (beforeState == data.getFrom()->getState()) {
+            if (beforeTransitionName == data.getTransition_name())
+                return false;
+            beforeTransitionName = data.getTransition_name();
+        } else {
+            beforeTransitionName = data.getTransition_name();
+            beforeState = data.getFrom()->getState();
+        }
+    }
+
+    return true;
 }
 
 

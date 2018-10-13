@@ -1,36 +1,79 @@
 #include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <fstream>
 #include "gtest/gtest.h"
 #include "Automaton.h"
 
 class AutomatonTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
-        intitAutomatonNotCompleteNotDeterministic(automatonNotCompleteNotDeterministic);
+        intitAutomatonNotCompleteNotDeterministic();
+        intitAutomatonNotCompleteDeterministic();
+        intitAutomatonCompleteNotDeterministic();
+        intitAutomatonCompleteDeterministic();
     }
 
-    void intitAutomatonNotCompleteNotDeterministic(fa::Automaton &aut){
-        aut.addState(0);
-        aut.setStateInitial(0);
-        aut.addState(1);
-        aut.setStateFinal(1);
-        aut.setStateInitial(1);
-        aut.addState(3);
-        aut.addState(2);
-        aut.addState(4);
-        aut.setStateFinal(4);
-        aut.addTransition(0,'a',1);
-        aut.addTransition(0,'a',2);
-        aut.addTransition(0,'a',3);
-        aut.addTransition(1,'b',3);
-        aut.addTransition(2,'a',3);
-        aut.addTransition(2,'b',4);
-        aut.addTransition(3,'a',3);
-        aut.addTransition(3,'b',4);
-        aut.addTransition(4,'a',4);
+    void intitAutomatonNotCompleteNotDeterministic() {
+        automatonNotCompleteNotDeterministic.addState(0);
+        automatonNotCompleteNotDeterministic.setStateInitial(0);
+        automatonNotCompleteNotDeterministic.addState(1);
+        automatonNotCompleteNotDeterministic.setStateFinal(1);
+        automatonNotCompleteNotDeterministic.setStateInitial(1);
+        automatonNotCompleteNotDeterministic.addState(3);
+        automatonNotCompleteNotDeterministic.addState(2);
+        automatonNotCompleteNotDeterministic.addState(4);
+        automatonNotCompleteNotDeterministic.setStateFinal(4);
+        automatonNotCompleteNotDeterministic.addTransition(0, 'a', 1);
+        automatonNotCompleteNotDeterministic.addTransition(0, 'a', 2);
+        automatonNotCompleteNotDeterministic.addTransition(0, 'a', 3);
+        automatonNotCompleteNotDeterministic.addTransition(1, 'b', 3);
+        automatonNotCompleteNotDeterministic.addTransition(2, 'a', 3);
+        automatonNotCompleteNotDeterministic.addTransition(2, 'b', 4);
+        automatonNotCompleteNotDeterministic.addTransition(3, 'a', 3);
+        automatonNotCompleteNotDeterministic.addTransition(3, 'b', 4);
+        automatonNotCompleteNotDeterministic.addTransition(4, 'a', 4);
+    }
+
+    void intitAutomatonNotCompleteDeterministic() {
+        automatonNotCompleteDeterministic.addState(0);
+        automatonNotCompleteDeterministic.setStateInitial(0);
+        automatonNotCompleteDeterministic.addState(1);
+        automatonNotCompleteDeterministic.addState(2);
+        automatonNotCompleteDeterministic.setStateFinal(2);
+        automatonNotCompleteDeterministic.addTransition(0, 'a', 1);
+        automatonNotCompleteDeterministic.addTransition(1, 'b', 2);
+        automatonNotCompleteDeterministic.addTransition(2, 'a', 2);
+        automatonNotCompleteDeterministic.addTransition(2, 'b', 2);
+    }
+
+    void intitAutomatonCompleteNotDeterministic() {
+        automatonCompleteNotDeterministic.addState(0);
+        automatonCompleteNotDeterministic.setStateInitial(0);
+        automatonCompleteNotDeterministic.addState(1);
+        automatonCompleteNotDeterministic.setStateFinal(1);
+        automatonCompleteNotDeterministic.addTransition(0, 'a', 1);
+        automatonCompleteNotDeterministic.addTransition(0, 'b', 1);
+        automatonCompleteNotDeterministic.addTransition(1, 'a', 0);
+        automatonCompleteNotDeterministic.addTransition(1, 'a', 1);
+        automatonCompleteNotDeterministic.addTransition(1, 'b', 1);
+    }
+
+    void intitAutomatonCompleteDeterministic() {
+        automatonCompleteDeterministic.addState(0);
+        automatonCompleteDeterministic.setStateInitial(0);
+        automatonCompleteDeterministic.addState(2);
+        automatonCompleteDeterministic.setStateFinal(2);
+        automatonCompleteDeterministic.addTransition(0, 'a', 2);
+        automatonCompleteDeterministic.addTransition(0, 'b', 2);
+        automatonCompleteDeterministic.addTransition(2, 'a', 0);
+        automatonCompleteDeterministic.addTransition(2, 'b', 2);
     }
 
     fa::Automaton automatonNotCompleteNotDeterministic;
+    fa::Automaton automatonNotCompleteDeterministic;
+    fa::Automaton automatonCompleteNotDeterministic;
+    fa::Automaton automatonCompleteDeterministic;
 
 };
 
@@ -48,7 +91,7 @@ protected:
 //*************************************************************************************
 
 //addState
-TEST_F(AutomatonTestFixture, addState){
+TEST_F(AutomatonTestFixture, addState) {
     EXPECT_EQ(automatonNotCompleteNotDeterministic.countStates(), 5u);
     EXPECT_TRUE(automatonNotCompleteNotDeterministic.hasState(0));
     EXPECT_TRUE(automatonNotCompleteNotDeterministic.hasState(1));
@@ -58,46 +101,45 @@ TEST_F(AutomatonTestFixture, addState){
 }
 
 //removeState
-TEST_F(AutomatonTestFixture, removeState){
+TEST_F(AutomatonTestFixture, removeState) {
     automatonNotCompleteNotDeterministic.removeState(0);
     EXPECT_EQ(automatonNotCompleteNotDeterministic.countStates(), 4u);
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.hasState(0));
 }
 
 //Initial/Final
-TEST(AutomatonTest, setInitialTestStateDontExist){
+TEST(AutomatonTest, setInitialTestStateDontExist) {
     fa::Automaton aut;
-    ASSERT_DEATH( { aut.setStateInitial(123); }, "");
+    ASSERT_DEATH({ aut.setStateInitial(123); }, "");
 }
 
-TEST(AutomatonTest, setInitialTestStateExistIsInitial){
+TEST(AutomatonTest, setInitialTestStateExistIsInitial) {
     fa::Automaton aut;
     aut.addState(0);
     aut.setStateInitial(0);
     ASSERT_TRUE(aut.isStateInitial(0));
 }
 
-TEST(AutomatonTest, setInitialTestStateExistNotInitial){
+TEST(AutomatonTest, setInitialTestStateExistNotInitial) {
     fa::Automaton aut;
     aut.addState(0);
     ASSERT_FALSE(aut.isStateInitial(0));
 }
 
 
-
-TEST(AutomatonTest, setFinalTestDontExist){
+TEST(AutomatonTest, setFinalTestDontExist) {
     fa::Automaton aut;
-    ASSERT_DEATH( { aut.setStateInitial(123); }, "");
+    ASSERT_DEATH({ aut.setStateInitial(123); }, "");
 }
 
-TEST(AutomatonTest, setFinalTestStateExistIsInitial){
+TEST(AutomatonTest, setFinalTestStateExistIsInitial) {
     fa::Automaton aut;
     aut.addState(0);
     aut.setStateFinal(0);
     ASSERT_TRUE(aut.isStateFinal(0));
 }
 
-TEST(AutomatonTest, setFinalTestStateExistNotFinal){
+TEST(AutomatonTest, setFinalTestStateExistNotFinal) {
     fa::Automaton aut;
     aut.addState(0);
     ASSERT_FALSE(aut.isStateFinal(0));
@@ -105,44 +147,44 @@ TEST(AutomatonTest, setFinalTestStateExistNotFinal){
 
 //addTransition
 
-TEST(AutomatonTest, addTransitionTestStateExistTransitionExist){
+TEST(AutomatonTest, addTransitionTestStateExistTransitionExist) {
     fa::Automaton aut;
     aut.addState(0);
     aut.addState(1);
-    aut.addTransition(0,'a',1);
-    EXPECT_TRUE(aut.hasTransition(0,'a', 1));
+    aut.addTransition(0, 'a', 1);
+    EXPECT_TRUE(aut.hasTransition(0, 'a', 1));
     EXPECT_EQ(1u, aut.getAlphabetSize());
     EXPECT_EQ(1u, aut.countTransitions());
 
 }
 
-TEST(AutomatonTest, addTransitionTestStateDontExist){
+TEST(AutomatonTest, addTransitionTestStateDontExist) {
     fa::Automaton aut;
-    EXPECT_DEATH({aut.addTransition(123,'t', 456);}, "");
+    EXPECT_DEATH({ aut.addTransition(123, 't', 456); }, "");
     EXPECT_EQ(0u, aut.countTransitions());
 
 }
 
-TEST(AutomatonTest, addTransitionTestState2DontExist){
+TEST(AutomatonTest, addTransitionTestState2DontExist) {
     fa::Automaton aut;
     aut.addState(0);
-    EXPECT_DEATH({aut.addTransition(0,'t', 1);}, "");
+    EXPECT_DEATH({ aut.addTransition(0, 't', 1); }, "");
     EXPECT_EQ(0u, aut.getAlphabetSize());
 }
 
-TEST(AutomatonTest, addTransitionTestState1DontExist){
+TEST(AutomatonTest, addTransitionTestState1DontExist) {
     fa::Automaton aut;
     aut.addState(1);
-    EXPECT_DEATH({aut.addTransition(0,'t', 1);}, "");
+    EXPECT_DEATH({ aut.addTransition(0, 't', 1); }, "");
     EXPECT_EQ(0u, aut.getAlphabetSize());
 }
 
 
-TEST(AutomatonTest, addTransitionTestStateExistTransitionDontExist){
+TEST(AutomatonTest, addTransitionTestStateExistTransitionDontExist) {
     fa::Automaton aut;
     aut.addState(0);
     aut.addState(1);
-    EXPECT_FALSE(aut.hasTransition(0,'a', 1));
+    EXPECT_FALSE(aut.hasTransition(0, 'a', 1));
     EXPECT_EQ(0u, aut.countTransitions());
 
 }
@@ -150,52 +192,83 @@ TEST(AutomatonTest, addTransitionTestStateExistTransitionDontExist){
 //removeTransition
 
 
-TEST(AutomatonTest, removeTransitionTestStateExistTransitionExist){
+TEST(AutomatonTest, removeTransitionTestStateExistTransitionExist) {
     fa::Automaton aut;
     aut.addState(0);
     aut.addState(1);
-    aut.addTransition(0,'a',1);
-    aut.removeTransition(0,'a', 1);
-    EXPECT_FALSE(aut.hasTransition(0,'a', 1));
+    aut.addTransition(0, 'a', 1);
+    aut.removeTransition(0, 'a', 1);
+    EXPECT_FALSE(aut.hasTransition(0, 'a', 1));
     EXPECT_EQ(1u, aut.getAlphabetSize());
     EXPECT_EQ(0u, aut.countTransitions());
 }
 
-TEST(AutomatonTest, removeTransitionTestStateDontExist){
+TEST(AutomatonTest, removeTransitionTestStateDontExist) {
     fa::Automaton aut;
-    EXPECT_DEATH({aut.removeTransition(123,'t', 456);}, "");
+    EXPECT_DEATH({ aut.removeTransition(123, 't', 456); }, "");
 }
 
-TEST(AutomatonTest, removeTransitionTestState2DontExist){
+TEST(AutomatonTest, removeTransitionTestState2DontExist) {
     fa::Automaton aut;
     aut.addState(1);
     aut.addState(0);
-    aut.addTransition(0,'a',1);
-    EXPECT_DEATH({aut.removeTransition(0,'t', 3);}, "");
+    aut.addTransition(0, 'a', 1);
+    EXPECT_DEATH({ aut.removeTransition(0, 't', 3); }, "");
 }
 
-TEST(AutomatonTest, removeTransitionTestState1DontExist){
+TEST(AutomatonTest, removeTransitionTestState1DontExist) {
     fa::Automaton aut;
     aut.addState(1);
     aut.addState(0);
-    aut.addTransition(0,'a',1);
-    EXPECT_DEATH({aut.removeTransition(3,'t', 1);}, "");
+    aut.addTransition(0, 'a', 1);
+    EXPECT_DEATH({ aut.removeTransition(3, 't', 1); }, "");
 }
 
 
-TEST(AutomatonTest, removeTransitionTestStateExistTransitionDontExist){
+TEST(AutomatonTest, removeTransitionTestStateExistTransitionDontExist) {
     fa::Automaton aut;
     aut.addState(0);
     aut.addState(1);
-    EXPECT_DEATH(aut.removeTransition(0,'a', 1), "");
+    EXPECT_DEATH(aut.removeTransition(0, 'a', 1), "");
 }
 
 /**
  * Print an automaton.
  */
-TEST_F(AutomatonTestFixture, prettyPrint){
+TEST_F(AutomatonTestFixture, prettyPrint) {
     automatonNotCompleteNotDeterministic.prettyPrint(std::cout);
+    std::ofstream ofstream;
+    ofstream.open("../dot/automate.dot");
+    if (!ofstream) {
+        std::cout << "error";
+        exit(EXIT_FAILURE);
+    }
+    automatonCompleteNotDeterministic.dotPrint(ofstream);
+    ofstream.close();
 }
+
+//******************************************************
+//              Part 2
+//******************************************************
+
+//Deterministic
+
+TEST_F(AutomatonTestFixture, isDeterministicTestAutomatonCompleteDeterministic) {
+    EXPECT_TRUE(automatonCompleteDeterministic.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, isDeterministicTestAutomatonNotCompleteDeterministic) {
+    EXPECT_TRUE(automatonNotCompleteDeterministic.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, isDeterministiTestAutomatonCompleteNotDeterministic) {
+    EXPECT_FALSE(automatonCompleteNotDeterministic.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, isDeterministiTestAutomatonNotCompleteNotDeterministic) {
+    EXPECT_FALSE(automatonNotCompleteNotDeterministic.isDeterministic());
+}
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

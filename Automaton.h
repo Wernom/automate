@@ -77,6 +77,8 @@ namespace fa {
         std::set<char> alphabet;
         std::map<int, StateConfiguration> stateCollection; // int the state, StateConfiguration the configuration of the state.
         std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value   We use map for a transitionCollection we can access, add, an element in O(log n)
+    public:
+        const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
 
     public:
         /**
@@ -238,7 +240,19 @@ namespace fa {
          * Print  the  automaton  with  respect  to the  DOT
          * specification
          */
-        void dotPrint(std:: ostream& os) const;
+        void dotPrint(std::ostream &os) const;
+
+        //*******************************************************
+        //                  Part 2
+        //*******************************************************
+
+        /**
+         * Tell if the  automaton  is  deterministic
+         *
+         * Expected  complexity: O(n * s)
+         */
+        bool isDeterministic() const;
+
     };
 }
 

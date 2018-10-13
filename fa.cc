@@ -8,7 +8,6 @@
 
 int main() {
 
-
     fa::Automaton aut;
 
     aut.addState(0);
@@ -23,6 +22,7 @@ int main() {
 
     aut.addTransition(0, 'a', 1);
     aut.addTransition(0, 'a', 2);
+    aut.addTransition(0, 'b', 2);
     aut.addTransition(0, 'a', 3);
     aut.addTransition(1, 'b', 3);
     aut.addTransition(2, 'a', 3);
@@ -31,20 +31,18 @@ int main() {
     aut.addTransition(3, 'b', 4);
     aut.addTransition(4, 'a', 4);
 
-
-   // aut.prettyPrint(std::cout);
+   for(fa::Transition data : aut.getTransitionCollection()){
+       std::cout << '{' << data.getFrom()->getState() << ", " << data.getTo()->getState() << ", " << data.getTransition_name() << '}' << std::endl;
+   }
 
     std::ofstream ofstream;
     ofstream.open("../dot/automate.dot");
     if (!ofstream){
-        std::cout << "erfffffffffffffffffffffffffffffffffror";
+        std::cout << "error";
         return 1;
-
     }
     aut.dotPrint(ofstream);
     ofstream.close();
-
-
 
     return 0;
 }
