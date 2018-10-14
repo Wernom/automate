@@ -143,6 +143,10 @@ void fa::Automaton::addTransition(int from, char alpha, int to) {
 
 
 void fa::Automaton::addToAlphabet(char alpha) {
+    if (!((alpha >= 48 && alpha <= 57) || (alpha >= 65 && alpha <= 90) || (alpha >= 97 && alpha <= 122))) {
+        std::cerr << "Error: character ASCII: \"" << (int) alpha << "\" is not supported";
+        exit(EXIT_FAILURE);
+    }
     alphabet.insert(alpha);
 }
 
@@ -202,10 +206,12 @@ void fa::Automaton::prettyPrint(std::ostream &os) const {
         os << data << ' ';
     }
 
+    std::map<int, StateConfiguration> cpy(this->stateCollection);
     os << "\n\nTransitions:";
     auto it1 = transition.begin();
     while (it1 != transition.end()) {
-        os << "\n\tFor state " << it1->first;
+        os << "\n\tFor state " << it1->first << ':';
+        cpy.erase(it1->first);
 
         auto it2 = it1->second.begin();
         while (it2 != it1->second.end()) {
@@ -217,6 +223,9 @@ void fa::Automaton::prettyPrint(std::ostream &os) const {
             ++it2;
         }
         ++it1;
+    }
+    for (auto data: cpy) {
+        os << "\n\tFor state " << data.first << ':';
     }
 
     os << std::endl;
@@ -261,10 +270,12 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
 
     os << ';' << std::endl << "\tnode [shape = circle];\n";
 
+    std::map<int, StateConfiguration> cpy(this->stateCollection);
     auto it1 = transition.begin();
     std::set<int> exist;
     while (it1 != transition.end()) {
         auto it2 = it1->second.begin();
+        cpy.erase(it1->first);
         while (it2 != it1->second.end()) {
             for (auto data : it2->second) {
                 os << '\t';
@@ -280,6 +291,9 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
         }
         ++it1;
     }
+    for (auto data: cpy) {
+        os << '\t' << data.first << ';' << std::endl;
+    }
 
     os << '}';
 }
@@ -290,6 +304,8 @@ const std::set<fa::Transition, fa::TransitionComparator> &fa::Automaton::getTran
 
 
 bool fa::Automaton::isDeterministic() const {
+    if (getAlphabetSize() == 0)
+        return true;
     char beforeTransitionName = (char) NULL;
     int beforeState = (int) NULL;
 
@@ -305,6 +321,77 @@ bool fa::Automaton::isDeterministic() const {
     }
 
     return true;
+}
+
+bool fa::Automaton::isComplete() const {
+    if (getAlphabetSize() == 0)
+        return true;
+    char beforeTransitionName = this->transitionCollection.begin()->getTransition_name();
+    int beforeState = this->transitionCollection.begin()->getFrom()->getState();
+    size_t sizeAlphabet = this->getAlphabetSize();
+    size_t countLetter = 1;
+    std::map<int, StateConfiguration> cpyState(this->stateCollection);
+
+    for (Transition data : this->transitionCollection) {
+        if (beforeState == data.getFrom()->getState()) {
+            if (beforeTransitionName == data.getTransition_name())
+                continue;
+            beforeTransitionName = data.getTransition_name();
+            ++countLetter;
+        } else {
+            cpyState.erase(beforeState);
+            if (countLetter != sizeAlphabet)
+                return false;
+
+            sizeAlphabet = this->getAlphabetSize();
+            beforeTransitionName = data.getTransition_name();
+            beforeState = data.getFrom()->getState();
+            countLetter = 1;
+        }
+    }
+    cpyState.erase(beforeState);
+    if (countLetter != sizeAlphabet)
+        return false;
+    return cpyState.empty();
+}
+
+void fa::Automaton::makeComplete() {
+    bool found = false;
+    int trashState = -1;
+    std::map<int, StateConfiguration> cpyState(this->stateCollection);
+    std::map<int, std::set<char>> missingTrans;
+    for (auto data : this->stateCollection) {
+        missingTrans[data.first] = std::set<char>(this->alphabet);
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 10000000);
+
+    while (!found) {//if -1 state is taken.
+        if (!hasState(trashState))
+            found = true;
+        else
+            trashState = dis(gen);
+    }
+
+    for (Transition data : this->transitionCollection) {
+        missingTrans[data.getFrom()->getState()].erase(data.getTransition_name());
+        if (missingTrans.count(data.getFrom()->getState()) == 0)
+            missingTrans.erase(data.getFrom()->getState());
+    }
+
+    if (!missingTrans.empty())
+        this->addState(trashState);
+
+    for (auto data : missingTrans) {
+        for (auto alpha : data.second)
+            this->addTransition(data.first, alpha, trashState);
+    }
+
+    for (auto data : this->alphabet)
+        this->addTransition(trashState, data, trashState);
+
 }
 
 

@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <random>
 
 //TODO: faire test afficher automate.
 //TODO: cf operator.
@@ -252,6 +253,21 @@ namespace fa {
          * Expected  complexity: O(n * s)
          */
         bool isDeterministic() const;
+
+        /**
+         * Tell if the  automaton  is  complete
+         *
+         * Expected  complexity: O(n * s)
+         */
+        bool isComplete() const;
+
+
+        /**
+         * Make  the  automaton  complete
+         *
+         * Expected  complexity: O(n)
+         */
+        void makeComplete();
 
     };
 }
