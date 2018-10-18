@@ -9,7 +9,7 @@ fa::StateConfiguration::StateConfiguration(int state) : state(state) {
 }
 
 bool fa::StateConfiguration::isInitial() const {
-    return initial;
+    return this->initial;
 }
 
 void fa::StateConfiguration::setInitial(bool is_initial) {
@@ -17,7 +17,7 @@ void fa::StateConfiguration::setInitial(bool is_initial) {
 }
 
 bool fa::StateConfiguration::isFinal() const {
-    return final;
+    return this->final;
 }
 
 void fa::StateConfiguration::setFinal(bool is_final) {
@@ -25,7 +25,7 @@ void fa::StateConfiguration::setFinal(bool is_final) {
 }
 
 int fa::StateConfiguration::getState() const {
-    return state;
+    return this->state;
 }
 
 void fa::StateConfiguration::setState(int state) {
@@ -259,16 +259,16 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
     os << "digraph automaton{\n\trankdir=LR;\n\tnode[shape = point, color=white, fontcolor=white];";
 
     for (auto data : initialState) {
-        os << " start" << data << ' ';
+        os << " start" << data << ';';
     }
 
 
-    os << ";\n\tnode [shape = doublecircle, color=black, fontcolor=black];";
+    os << "\n\tnode [shape = doublecircle, color=black, fontcolor=black];";
     for (auto data : finalState) {
-        os << ' ' << data;
+        os << ' ' << data << ';';
     }
 
-    os << ';' << std::endl << "\tnode [shape = circle];\n";
+    os << std::endl << "\tnode [shape = circle];\n";
 
     std::map<int, StateConfiguration> cpy(this->stateCollection);
     auto it1 = transition.begin();
@@ -291,8 +291,24 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
         }
         ++it1;
     }
+
     for (auto data: cpy) {
-        os << '\t' << data.first << ';' << std::endl;
+        if(!data.second.isFinal()){
+            os << '\t';
+            os << data.first << ';' << std::endl;
+        }
+    }
+
+
+    for (auto data: cpy) {
+        os << '\t';
+        if (data.second.isFinal())
+            os << "node [shape = doublecircle, color=black, fontcolor=black];" << data.first <<';' << std::endl;
+
+        if (data.second.isInitial()) {
+            os << "node[shape = point, color=white, fontcolor=white]; start" << data.first << ';' << std::endl;
+            os << "\tstart" << data.first << "->" << data.first << ';';
+        }
     }
 
     os << '}';
@@ -391,6 +407,14 @@ void fa::Automaton::makeComplete() {
 
     for (auto data : this->alphabet)
         this->addTransition(trashState, data, trashState);
+
+}
+
+void fa::Automaton::makeComplement() {
+
+    for (auto &data : this->stateCollection) {
+        data.second.setFinal(!data.second.isFinal());
+    }
 
 }
 

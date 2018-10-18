@@ -7,9 +7,6 @@
 #include <iostream>
 #include <random>
 
-//TODO: faire test afficher automate.
-//TODO: cf operator.
-
 namespace fa {
     /**
      * Describe the state configuration
@@ -269,6 +266,25 @@ namespace fa {
          */
         void makeComplete();
 
+        /**
+         * Transform  the  automaton  to the  complement
+         *
+         * The  automaton  must be  deterministic  and  complete.
+         *
+         * Expected  complexity: O(n + m)
+         */
+        void makeComplement();
+
+        //*******************************************************
+        //                  Part 3
+        //*******************************************************
+
+        /**
+         * Check  if the  language  of the  automaton  is empty
+         *
+         * Expected  complexity: O(n)
+         */
+        bool isLanguageEmpty () const;
     };
 }
 

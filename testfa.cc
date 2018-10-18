@@ -5,6 +5,16 @@
 #include "gtest/gtest.h"
 #include "Automaton.h"
 
+#define DOT_PRINT(automaton, fileName , nameOfStream)\
+    std::ofstream nameOfStream;\
+    nameOfStream.open("../dot/" + fileName +".dot");\
+    if (!nameOfStream) {\
+    std::cout << "error";\
+    exit(EXIT_FAILURE);\
+    }\
+    automaton.dotPrint(nameOfStream);\
+    nameOfStream.close();
+
 class AutomatonTestFixture : public ::testing::Test {
 protected:
     void SetUp() override {
@@ -15,6 +25,10 @@ protected:
         initAutomaton();
         initAutomatonInutile();
         initAutomatonCoAccessible();
+        initAutomatonEmptyInutileIsInitial();
+        initAutomatonEmpty();
+        initAutomatonEmptyNoFinal();
+        initAutomatonEmptyNoInitial();
     }
 
     void intitAutomatonNotCompleteNotDeterministic() {
@@ -129,6 +143,39 @@ protected:
         automatonCoAccessible.addTransition(3, 'a', 2);
     }
 
+    void initAutomatonEmptyInutileIsInitial(){
+        automatonEmptyInutileIsInitial.addState(1);
+        automatonEmptyInutileIsInitial.setStateInitial(1);
+        automatonEmptyInutileIsInitial.addState(2);
+        automatonEmptyInutileIsInitial.setStateFinal(2);
+        automatonEmptyInutileIsInitial.addState(3);
+        automatonEmptyInutileIsInitial.setStateInitial(3);
+        automatonEmptyInutileIsInitial.addTransition(1,'a',2);
+        automatonEmptyInutileIsInitial.addTransition(2, 'a', 1);
+    }
+
+    void initAutomatonEmpty(){
+        automatonEmpty.addState(1);
+        automatonEmpty.setStateInitial(1);
+        automatonEmpty.addState(2);
+        automatonEmpty.setStateFinal(2);
+        automatonEmpty.addState(3);
+        automatonEmpty.addTransition(3,'a',2);
+        automatonEmpty.addTransition(3, 'a', 1);
+    }
+
+    void initAutomatonEmptyNoInitial(){
+        automatonEmptyNoInitial.addState(1);
+        automatonEmptyNoInitial.addState(2);
+        automatonEmptyNoInitial.setStateFinal(2);
+    }
+
+    void initAutomatonEmptyNoFinal(){
+        automatonEmptyNoFinal.addState(1);
+        automatonEmptyNoFinal.setStateInitial(1);
+        automatonEmptyNoFinal.addState(2);
+    }
+
     fa::Automaton automatonNotCompleteNotDeterministic;
     fa::Automaton automatonNotCompleteDeterministic;
     fa::Automaton automatonCompleteNotDeterministic;
@@ -136,6 +183,11 @@ protected:
     fa::Automaton automatonInutile;
     fa::Automaton automatonCoAccessible;
     fa::Automaton automaton;
+    fa::Automaton automatonEmptyInutileIsInitial;//TODO: dot print
+    fa::Automaton automatonEmpty;//TODO: dot print
+    fa::Automaton automatonEmptyNoInitial;//TODO: dot print
+    fa::Automaton automatonEmptyNoFinal;//TODO: dot print
+
 
 };
 
@@ -369,14 +421,10 @@ TEST_F(AutomatonTestFixture, prettyPrint) {
     automatonCoAccessible.dotPrint(ofstream7);
     ofstream7.close();
 
-    fa::Automaton automatonNotCompleteNotDeterministic;
-    fa::Automaton automatonNotCompleteDeterministic;
-    fa::Automaton automatonCompleteNotDeterministic;
-    fa::Automaton automatonCompleteDeterministic;
-    fa::Automaton automatonInutile;
-    fa::Automaton automatonCoAccessible;
-    fa::Automaton automaton;
-
+    DOT_PRINT(automatonEmptyInutileIsInitial ,std::string("automatonEmptyInutileIsInitial"), ofstream8);
+    DOT_PRINT(automatonEmpty ,std::string("automatonEmpty"), ofstream9);
+    DOT_PRINT(automatonEmptyNoInitial ,std::string("automatonEmptyNoInitial"), ofstream10);
+    DOT_PRINT(automatonEmptyNoFinal ,std::string("automatonEmptyNoFinal"), ofstream11);
 
 }
 
@@ -490,6 +538,25 @@ TEST_F(AutomatonTestFixture, makeCompleteTestComplete){
     automatonNotCompleteNotDeterministic.makeComplete();
     EXPECT_TRUE(automatonCompleteNotDeterministic.isComplete());
 }
+
+//make Complement
+
+TEST_F(AutomatonTestFixture, makeComplement){
+    automatonInutile.makeComplement();
+    std::ofstream ofstream;
+    ofstream.open("../dot/automatonInutileComplment.dot");
+    if (!ofstream) {
+        std::cout << "error";
+        exit(EXIT_FAILURE);
+    }
+    automatonInutile.dotPrint(ofstream);
+    ofstream.close();
+    EXPECT_TRUE(automatonInutile.isStateFinal(1));
+    EXPECT_FALSE(automatonInutile.isStateFinal(2));
+    EXPECT_TRUE(automatonInutile.isStateFinal(3));
+}
+
+
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
