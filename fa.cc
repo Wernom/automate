@@ -44,14 +44,16 @@ int main() {
 //    aut.dotPrint(ofstream);
 //    ofstream.close();
 
-    std::map<int, char> a;
-    a.insert(std::pair<int, char>(1,'m'));
-    a.insert(std::pair<int, char>(15,'r'));
+//    std::map<int, char> a;
+//    a.insert(std::pair<int, char>(1,'m'));
+//    a.insert(std::pair<int, char>(15,'r'));
+//
+//    std::map<int, char> cpy(a);
+//
+//    for(auto it = cpy.begin(); it != cpy.end(); ++it)
+//        std::cout << it->first << "   " << it->second << std::endl;
+//
 
-    std::map<int, char> cpy(a);
-
-    for(auto it = cpy.begin(); it != cpy.end(); ++it)
-        std::cout << it->first << "   " << it->second << std::endl;
 
 
 

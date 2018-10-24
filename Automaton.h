@@ -1,6 +1,10 @@
 #ifndef AUTOMATE_AUTOMATON_H
 #define AUTOMATE_AUTOMATON_H
 
+class Transition;
+
+class Transition;
+
 #include <vector>
 #include <map>
 #include <set>
@@ -8,6 +12,9 @@
 #include <random>
 
 namespace fa {
+
+    class Transition;
+
     /**
      * Describe the state configuration
      */
@@ -27,6 +34,8 @@ namespace fa {
         void setFinal(bool is_final);
 
         int getState() const;
+
+        std::set<fa::Transition>::iterator itFirstTransition; //Transition collection is sorted.
 
         void setState(int state);
 
@@ -71,14 +80,20 @@ namespace fa {
      * Describe an automaton
      */
     class Automaton {
-        //TODO: implement collection set<*StateConfiguration> final and initial.
         std::set<char> alphabet;
+        std::set<int> initialState;
         std::map<int, StateConfiguration> stateCollection; // int the state, StateConfiguration the configuration of the state.
-        std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value   We use map for a transitionCollection we can access, add, an element in O(log n)
-    public:
-        const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
+        std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value. This collection is sorted by TransitionComparator.
+
+
+
 
     public:
+        const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
+        const std::set<int> &getInitialState() const;
+
+
+
         /**
          * Add a state  to the  automaton.
          *

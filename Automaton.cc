@@ -83,6 +83,7 @@ std::size_t fa::Automaton::countStates() const {
 void fa::Automaton::setStateInitial(int state) {
     if (hasState(state)) {
         this->stateCollection.find(state)->second.setInitial(true);
+        this->initialState.insert(state);
     } else {
         std::cerr << "Error: the state doesn't exist." << std::endl;
         exit(EXIT_FAILURE);
@@ -138,7 +139,8 @@ void fa::Automaton::addTransition(int from, char alpha, int to) {
 
     addToAlphabet(alpha);
     fa::Transition data(&stateCollection.find(from)->second, alpha, &stateCollection.find(to)->second);
-    transitionCollection.insert(data);
+    auto pair = transitionCollection.insert(data);
+    stateCollection.find(from)->second.itFirstTransition = pair.first;
 }
 
 
@@ -416,6 +418,20 @@ void fa::Automaton::makeComplement() {
         data.second.setFinal(!data.second.isFinal());
     }
 
+}
+
+const std::set<int> &fa::Automaton::getInitialState() const {
+    return initialState;
+}
+
+bool fa::Automaton::isLanguageEmpty() const {
+    std::set<int> isVisited;
+    for (auto it = this->initialState.begin(); it != this->initialState.end(); ++it) {
+        it
+    }
+
+
+    return false;
 }
 
 

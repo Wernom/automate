@@ -145,7 +145,6 @@ protected:
 
     void initAutomatonEmptyInutileIsInitial(){
         automatonEmptyInutileIsInitial.addState(1);
-        automatonEmptyInutileIsInitial.setStateInitial(1);
         automatonEmptyInutileIsInitial.addState(2);
         automatonEmptyInutileIsInitial.setStateFinal(2);
         automatonEmptyInutileIsInitial.addState(3);
@@ -187,7 +186,6 @@ protected:
     fa::Automaton automatonEmpty;//TODO: dot print
     fa::Automaton automatonEmptyNoInitial;//TODO: dot print
     fa::Automaton automatonEmptyNoFinal;//TODO: dot print
-
 
 };
 
@@ -555,6 +553,59 @@ TEST_F(AutomatonTestFixture, makeComplement){
     EXPECT_FALSE(automatonInutile.isStateFinal(2));
     EXPECT_TRUE(automatonInutile.isStateFinal(3));
 }
+
+//******************************************************
+//              Part 3
+//******************************************************
+
+//isLanguageEmpty
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomate){
+    EXPECT_FALSE(automaton.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCoAccessible){
+    EXPECT_FALSE(automatonCoAccessible.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCompleteDeterministic){
+    EXPECT_FALSE(automatonCompleteDeterministic.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCompleteNotDeterministic){
+    EXPECT_FALSE(automatonCompleteNotDeterministic.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteNotDeterministic){
+    EXPECT_FALSE(automatonNotCompleteNotDeterministic.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmpty){
+    EXPECT_TRUE(automatonEmpty.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyInutileIsInitial){
+    EXPECT_TRUE(automatonEmptyInutileIsInitial.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoFinal){
+    EXPECT_TRUE(automatonEmptyNoFinal.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonInutile){
+    EXPECT_FALSE(automatonInutile.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteDeterministic){
+    EXPECT_FALSE(automatonNotCompleteDeterministic.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoInitial){
+    EXPECT_FALSE(automatonEmptyNoInitial.isLanguageEmpty());
+}
+
+
+
 
 
 
