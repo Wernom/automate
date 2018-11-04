@@ -1,11 +1,10 @@
 #include <iostream>
 #include <iomanip>
-#include <iostream>
 #include <fstream>
 #include "gtest/gtest.h"
 #include "Automaton.h"
 
-#define DOT_PRINT(automaton, fileName , nameOfStream)\
+#define DOT_PRINT(automaton, fileName, nameOfStream)\
     std::ofstream nameOfStream;\
     nameOfStream.open("../dot/" + fileName +".dot");\
     if (!nameOfStream) {\
@@ -87,7 +86,7 @@ protected:
         automatonCompleteDeterministic.addTransition(2, 'b', 2);
     }
 
-    void initAutomaton(){
+    void initAutomaton() {
         automaton.addState(0);
         automaton.addState(2);
         automaton.addState(123);
@@ -107,7 +106,7 @@ protected:
         automaton.addTransition(0, 'a', 0);
         automaton.addTransition(0, 'z', 2);
         automaton.addTransition(0, 'u', 8);
-        automaton.addTransition(0, (char)122, 8);
+        automaton.addTransition(0, (char) 122, 8);
         automaton.addTransition(2, 'a', 123);
         automaton.addTransition(2, 'a', 5);
         automaton.addTransition(3, '7', 2);
@@ -119,57 +118,57 @@ protected:
         automaton.addTransition(3, 'j', 7);
     }
 
-    void initAutomatonInutile(){
+    void initAutomatonInutile() {
         automatonInutile.addState(1);
         automatonInutile.setStateInitial(1);
         automatonInutile.addState(2);
         automatonInutile.setStateFinal(2);
         automatonInutile.addState(3);
-        automatonInutile.addTransition(1,'a',2);
+        automatonInutile.addTransition(1, 'a', 2);
         automatonInutile.addTransition(2, 'a', 1);
     }
 
-    void initAutomatonCoAccessible(){
+    void initAutomatonCoAccessible() {
         automatonCoAccessible.addState(1);
         automatonCoAccessible.setStateInitial(1);
         automatonCoAccessible.addState(2);
         automatonCoAccessible.setStateFinal(2);
         automatonCoAccessible.addState(3);
-        automatonCoAccessible.addTransition(1,'a',2);
-        automatonCoAccessible.addTransition(1,'b',2);
+        automatonCoAccessible.addTransition(1, 'a', 2);
+        automatonCoAccessible.addTransition(1, 'b', 2);
         automatonCoAccessible.addTransition(2, 'a', 1);
         automatonCoAccessible.addTransition(2, 'b', 1);
         automatonCoAccessible.addTransition(3, 'a', 1);
         automatonCoAccessible.addTransition(3, 'a', 2);
     }
 
-    void initAutomatonEmptyInutileIsInitial(){
+    void initAutomatonEmptyInutileIsInitial() {
         automatonEmptyInutileIsInitial.addState(1);
         automatonEmptyInutileIsInitial.addState(2);
         automatonEmptyInutileIsInitial.setStateFinal(2);
         automatonEmptyInutileIsInitial.addState(3);
         automatonEmptyInutileIsInitial.setStateInitial(3);
-        automatonEmptyInutileIsInitial.addTransition(1,'a',2);
+        automatonEmptyInutileIsInitial.addTransition(1, 'a', 2);
         automatonEmptyInutileIsInitial.addTransition(2, 'a', 1);
     }
 
-    void initAutomatonEmpty(){
+    void initAutomatonEmpty() {
         automatonEmpty.addState(1);
         automatonEmpty.setStateInitial(1);
         automatonEmpty.addState(2);
         automatonEmpty.setStateFinal(2);
         automatonEmpty.addState(3);
-        automatonEmpty.addTransition(3,'a',2);
+        automatonEmpty.addTransition(3, 'a', 2);
         automatonEmpty.addTransition(3, 'a', 1);
     }
 
-    void initAutomatonEmptyNoInitial(){
+    void initAutomatonEmptyNoInitial() {
         automatonEmptyNoInitial.addState(1);
         automatonEmptyNoInitial.addState(2);
         automatonEmptyNoInitial.setStateFinal(2);
     }
 
-    void initAutomatonEmptyNoFinal(){
+    void initAutomatonEmptyNoFinal() {
         automatonEmptyNoFinal.addState(1);
         automatonEmptyNoFinal.setStateInitial(1);
         automatonEmptyNoFinal.addState(2);
@@ -259,7 +258,7 @@ TEST(AutomatonTest, setFinalTestStateExistNotFinal) {
 
 //addTransition
 
-TEST(AutomatonTest, addAlphabetTestNotPrintable){
+TEST(AutomatonTest, addAlphabetTestNotPrintable) {
     fa::Automaton aut;
     aut.addState(0);
     aut.addState(1);
@@ -274,14 +273,12 @@ TEST(AutomatonTest, addTransitionTestStateExistTransitionExist) {
     EXPECT_TRUE(aut.hasTransition(0, 'a', 1));
     EXPECT_EQ(1u, aut.getAlphabetSize());
     EXPECT_EQ(1u, aut.countTransitions());
-
 }
 
 TEST(AutomatonTest, addTransitionTestStateDontExist) {
     fa::Automaton aut;
     EXPECT_DEATH({ aut.addTransition(123, 't', 456); }, "");
     EXPECT_EQ(0u, aut.countTransitions());
-
 }
 
 TEST(AutomatonTest, addTransitionTestState2DontExist) {
@@ -419,10 +416,10 @@ TEST_F(AutomatonTestFixture, prettyPrint) {
     automatonCoAccessible.dotPrint(ofstream7);
     ofstream7.close();
 
-    DOT_PRINT(automatonEmptyInutileIsInitial ,std::string("automatonEmptyInutileIsInitial"), ofstream8);
-    DOT_PRINT(automatonEmpty ,std::string("automatonEmpty"), ofstream9);
-    DOT_PRINT(automatonEmptyNoInitial ,std::string("automatonEmptyNoInitial"), ofstream10);
-    DOT_PRINT(automatonEmptyNoFinal ,std::string("automatonEmptyNoFinal"), ofstream11);
+    DOT_PRINT(automatonEmptyInutileIsInitial, std::string("automatonEmptyInutileIsInitial"), ofstream8);
+    DOT_PRINT(automatonEmpty, std::string("automatonEmpty"), ofstream9);
+    DOT_PRINT(automatonEmptyNoInitial, std::string("automatonEmptyNoInitial"), ofstream10);
+    DOT_PRINT(automatonEmptyNoFinal, std::string("automatonEmptyNoFinal"), ofstream11);
 
 }
 
@@ -491,7 +488,7 @@ TEST_F(AutomatonTestFixture, isCompleteTestAutomatonCoAccessible) {
 }
 //make Complete
 
-TEST_F(AutomatonTestFixture, makeCompleteTestNotComplete){
+TEST_F(AutomatonTestFixture, makeCompleteTestNotComplete) {
     size_t size = automatonNotCompleteNotDeterministic.getAlphabetSize();
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.isComplete());
 
@@ -508,7 +505,7 @@ TEST_F(AutomatonTestFixture, makeCompleteTestNotComplete){
     EXPECT_TRUE(automatonNotCompleteNotDeterministic.isComplete());
 }
 
-TEST_F(AutomatonTestFixture, makeCompleteTestAutomaton){
+TEST_F(AutomatonTestFixture, makeCompleteTestAutomaton) {
     size_t size = automaton.getAlphabetSize();
     EXPECT_FALSE(automaton.isComplete());
 
@@ -525,13 +522,13 @@ TEST_F(AutomatonTestFixture, makeCompleteTestAutomaton){
     EXPECT_TRUE(automaton.isComplete());
 }
 
-TEST_F(AutomatonTestFixture, makeCompleteTestAlphabetSame){
+TEST_F(AutomatonTestFixture, makeCompleteTestAlphabetSame) {
     size_t i = automatonNotCompleteNotDeterministic.getAlphabetSize();
     automatonNotCompleteNotDeterministic.makeComplete();
     EXPECT_EQ(i, automatonNotCompleteNotDeterministic.getAlphabetSize());
 }
 
-TEST_F(AutomatonTestFixture, makeCompleteTestComplete){
+TEST_F(AutomatonTestFixture, makeCompleteTestComplete) {
     EXPECT_TRUE(automatonCompleteNotDeterministic.isComplete());
     automatonNotCompleteNotDeterministic.makeComplete();
     EXPECT_TRUE(automatonCompleteNotDeterministic.isComplete());
@@ -539,7 +536,7 @@ TEST_F(AutomatonTestFixture, makeCompleteTestComplete){
 
 //make Complement
 
-TEST_F(AutomatonTestFixture, makeComplement){
+TEST_F(AutomatonTestFixture, makeComplement) {
     automatonInutile.makeComplement();
     std::ofstream ofstream;
     ofstream.open("../dot/automatonInutileComplment.dot");
@@ -558,55 +555,62 @@ TEST_F(AutomatonTestFixture, makeComplement){
 //              Part 3
 //******************************************************
 
+TEST_F(AutomatonTestFixture, toDELELTE) {
+    for (const auto &it : automaton.getTransitionCollection()) {
+        std::cout << it.getFrom()->getState() << '\t' << it.getTransition_name() << '\t' << it.getTo()->getState()
+                  << std::endl;
+    }
+
+
+    std::cout << &automaton.getStateCollection().begin()->second.getItFirstTransition() << std::endl;
+
+}
+
 //isLanguageEmpty
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomate){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomate) {
     EXPECT_FALSE(automaton.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCoAccessible){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCoAccessible) {
     EXPECT_FALSE(automatonCoAccessible.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCompleteDeterministic){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCompleteDeterministic) {
     EXPECT_FALSE(automatonCompleteDeterministic.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCompleteNotDeterministic){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonCompleteNotDeterministic) {
     EXPECT_FALSE(automatonCompleteNotDeterministic.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteNotDeterministic){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteNotDeterministic) {
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmpty){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmpty) {
     EXPECT_TRUE(automatonEmpty.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyInutileIsInitial){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyInutileIsInitial) {
     EXPECT_TRUE(automatonEmptyInutileIsInitial.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoFinal){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoFinal) {
     EXPECT_TRUE(automatonEmptyNoFinal.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonInutile){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonInutile) {
     EXPECT_FALSE(automatonInutile.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteDeterministic){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteDeterministic) {
     EXPECT_FALSE(automatonNotCompleteDeterministic.isLanguageEmpty());
 }
 
-TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoInitial){
+TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoInitial) {
     EXPECT_FALSE(automatonEmptyNoInitial.isLanguageEmpty());
 }
-
-
-
-
 
 
 int main(int argc, char **argv) {

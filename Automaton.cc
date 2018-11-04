@@ -6,6 +6,7 @@ fa::StateConfiguration::StateConfiguration(int state) : state(state) {
     this->state = state;
     this->initial = false;
     this->final = false;
+    this->firstTransition = nullptr;
 }
 
 bool fa::StateConfiguration::isInitial() const {
@@ -31,6 +32,15 @@ int fa::StateConfiguration::getState() const {
 void fa::StateConfiguration::setState(int state) {
     StateConfiguration::state = state;
 }
+
+fa::Transition *fa::StateConfiguration::getFirstTransition() const {
+    return firstTransition;
+}
+
+void fa::StateConfiguration::setFirstTransition(fa::Transition *firstTransition) {
+    StateConfiguration::firstTransition = firstTransition;
+}
+
 
 //Transition's function
 
@@ -139,8 +149,22 @@ void fa::Automaton::addTransition(int from, char alpha, int to) {
 
     addToAlphabet(alpha);
     fa::Transition data(&stateCollection.find(from)->second, alpha, &stateCollection.find(to)->second);
-    auto pair = transitionCollection.insert(data);
-    stateCollection.find(from)->second.itFirstTransition = pair.first;
+
+
+    auto state = this->stateCollection.find(from);
+
+    if(state->second.getFirstTransition() == nullptr){
+        this->transitionCollection.insert(data);
+        state->second.setFirstTransition(this->transitionCollection.find(data));
+    }else
+        this->transitionCollection.insert(data);
+
+
+    std::cout << this->transitionCollection.insert(data).first->getTransition_name();
+    std::cout << '\t' << &state->second.getItFirstTransition() ;
+    std::cout << state->second.getItFirstTransition()->getTransition_name() << std::endl;
+
+
 }
 
 
@@ -295,7 +319,7 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
     }
 
     for (auto data: cpy) {
-        if(!data.second.isFinal()){
+        if (!data.second.isFinal()) {
             os << '\t';
             os << data.first << ';' << std::endl;
         }
@@ -305,7 +329,7 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
     for (auto data: cpy) {
         os << '\t';
         if (data.second.isFinal())
-            os << "node [shape = doublecircle, color=black, fontcolor=black];" << data.first <<';' << std::endl;
+            os << "node [shape = doublecircle, color=black, fontcolor=black];" << data.first << ';' << std::endl;
 
         if (data.second.isInitial()) {
             os << "node[shape = point, color=white, fontcolor=white]; start" << data.first << ';' << std::endl;
@@ -425,13 +449,52 @@ const std::set<int> &fa::Automaton::getInitialState() const {
 }
 
 bool fa::Automaton::isLanguageEmpty() const {
-    std::set<int> isVisited;
-    for (auto it = this->initialState.begin(); it != this->initialState.end(); ++it) {
-        it
+    if (this->initialState.empty())
+        return false;
+
+
+    std::set<int> visited;
+    for (int it0 : this->initialState) {
+        if (visited.find(it0) != visited.end())//TODO: si un etat initial à deja été parcouru soit on à trouver un état final soit on en trouvera jamais => inutile.
+            continue;
+
+//        if(this->stateCollection.find(it0)->second.isFinal())
+//            return true;
+
+
+        if(this->checkPathToFinalState(this->stateCollection.find(it0)->second, &visited))
+            return true;
+
     }
 
+    return false;
+}
+
+bool fa::Automaton::checkPathToFinalState(fa::StateConfiguration state, std::set<int> *visited) const {
+    std::cout << state.getState() << '\t' << state.isFinal() << std::endl;
+    if (state.isFinal())
+        return true;
+
+    visited->insert(state.getState());
+    std::cout << "ok" << std::endl;
+
+    for (auto it = state.getItFirstTransition(); it->getTo()->getState() != state.getState(); ++it) {
+        std::cout << "ok" << std::endl;
+
+
+        std::cout << it->getTo()->getState() << std::endl;
+        std::cout << "ok" << std::endl;
+
+        if (this->checkPathToFinalState(*(*it).getTo(), visited))
+            return true;
+
+    }
 
     return false;
+}
+
+const std::map<int, fa::StateConfiguration> &fa::Automaton::getStateCollection() const {
+    return stateCollection;
 }
 
 

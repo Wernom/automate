@@ -1,9 +1,7 @@
 #ifndef AUTOMATE_AUTOMATON_H
 #define AUTOMATE_AUTOMATON_H
 
-class Transition;
 
-class Transition;
 
 #include <vector>
 #include <map>
@@ -12,9 +10,9 @@ class Transition;
 #include <random>
 
 namespace fa {
-
     class Transition;
 
+    struct TransitionComparator;
     /**
      * Describe the state configuration
      */
@@ -22,6 +20,11 @@ namespace fa {
         bool initial;
         bool final;
         int state;
+        Transition *firstTransition;
+    public:
+        Transition *getFirstTransition() const;
+
+        void setFirstTransition(Transition *firstTransition);
 
     public:
 
@@ -35,7 +38,6 @@ namespace fa {
 
         int getState() const;
 
-        std::set<fa::Transition>::iterator itFirstTransition; //Transition collection is sorted.
 
         void setState(int state);
 
@@ -57,6 +59,7 @@ namespace fa {
         StateConfiguration *stateFrom;
         char transition_name;
         StateConfiguration *stateTo;
+
 
     public:
         Transition(StateConfiguration *stateFrom, char transition_name, StateConfiguration *stateTo);
@@ -81,16 +84,15 @@ namespace fa {
      */
     class Automaton {
         std::set<char> alphabet;
-        std::set<int> initialState;
-        std::map<int, StateConfiguration> stateCollection; // int the state, StateConfiguration the configuration of the state.
+        std::set<int> initialState; //TODO: mettre vrai état init.
+        std::map<int, StateConfiguration> stateCollection;// int the state, StateConfiguration the configuration of the state.
         std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value. This collection is sorted by TransitionComparator.
-
-
 
 
     public:
         const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
         const std::set<int> &getInitialState() const;
+        const std::map<int, StateConfiguration> &getStateCollection() const;
 
 
 
@@ -300,7 +302,15 @@ namespace fa {
          * Expected  complexity: O(n)
          */
         bool isLanguageEmpty () const;
+
+        /**
+         * Check if a path exist between an intial and a final state.
+         *
+         */
+        bool checkPathToFinalState (StateConfiguration state, std::set<int> *visited) const;
+
     };
+
 }
 
 

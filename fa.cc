@@ -6,6 +6,25 @@
 //add state then transition.
 
 
+void foo1(int i, std::set<int> *data){
+    data->insert(i);
+
+    for(auto d : *data){
+        std::cout << d << ' ';
+    }
+    std::cout << std::endl;
+
+}
+
+void foo0(){
+    std::set<int> data;
+
+    for(int i = 0; i < 5; i++){
+        foo1(i, &data);
+    }
+
+}
+
 int main() {
 //
 //    fa::Automaton aut;
@@ -43,19 +62,30 @@ int main() {
 //    }
 //    aut.dotPrint(ofstream);
 //    ofstream.close();
-
+//
 //    std::map<int, char> a;
 //    a.insert(std::pair<int, char>(1,'m'));
 //    a.insert(std::pair<int, char>(15,'r'));
 //
+//    a.find(1);
+
 //    std::map<int, char> cpy(a);
 //
 //    for(auto it = cpy.begin(); it != cpy.end(); ++it)
 //        std::cout << it->first << "   " << it->second << std::endl;
 //
 
+    fa::StateConfiguration s(1);
+
+    std::set<fa::StateConfiguration *> a;
+
+    int z = 3;
+
+    a.insert(&s);
 
 
+
+    foo0();
 
     return 0;
 }
