@@ -12,7 +12,13 @@
 namespace fa {
     class Transition;
 
-    struct TransitionComparator;
+    /**
+     * Comparator for Transation class
+     */
+    struct TransitionComparator {
+        bool operator()(const Transition &transition1, const Transition &transition2) const;
+    };
+
     /**
      * Describe the state configuration
      */
@@ -20,13 +26,11 @@ namespace fa {
         bool initial;
         bool final;
         int state;
-        Transition *firstTransition;
-    public:
-        Transition *getFirstTransition() const;
-
-        void setFirstTransition(Transition *firstTransition);
 
     public:
+
+        std::set<Transition, fa::TransitionComparator> transition;
+
 
         bool isInitial() const;
 
@@ -38,8 +42,11 @@ namespace fa {
 
         int getState() const;
 
-
         void setState(int state);
+
+        void setTransition(const std::set<Transition, TransitionComparator> &transition);
+
+        void insertTransition(Transition transition);
 
         explicit StateConfiguration(int state);
 
@@ -56,41 +63,34 @@ namespace fa {
      * Describe a transition.
      */
     class Transition {
-        StateConfiguration *stateFrom;
         char transition_name;
         StateConfiguration *stateTo;
 
 
     public:
-        Transition(StateConfiguration *stateFrom, char transition_name, StateConfiguration *stateTo);
 
-        StateConfiguration *getFrom() const;
+        Transition(char transition_name, StateConfiguration *stateTo);
 
         StateConfiguration *getTo() const;
 
         char getTransition_name() const;
-
     };
 
-    /**
-     * Comparator for Transation class
-     */
-    struct TransitionComparator {
-        bool operator()(const Transition &transition1, const Transition &transition2) const;
-    };
 
     /**
      * Describe an automaton
      */
     class Automaton {
+        unsigned int numberOfTransition = 0;
         std::set<char> alphabet;
-        std::set<int> initialState; //TODO: mettre vrai état init.
+        std::set<int> initialState;
+        std::set<int> finalState;
         std::map<int, StateConfiguration> stateCollection;// int the state, StateConfiguration the configuration of the state.
-        std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value. This collection is sorted by TransitionComparator.
+//        std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value. This collection is sorted by TransitionComparator.
 
 
     public:
-        const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
+//        const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
         const std::set<int> &getInitialState() const;
         const std::map<int, StateConfiguration> &getStateCollection() const;
 
@@ -249,7 +249,7 @@ namespace fa {
         /**
          * Print  the  automaton  in a friendly  way
          */
-        void prettyPrint(std::ostream &os) const;
+        void prettyPrint(std::ostream &os) const;//TODO: ca marche pas.
 
         /**
          * Print  the  automaton  with  respect  to the  DOT

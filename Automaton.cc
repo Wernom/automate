@@ -6,7 +6,6 @@ fa::StateConfiguration::StateConfiguration(int state) : state(state) {
     this->state = state;
     this->initial = false;
     this->final = false;
-    this->firstTransition = nullptr;
 }
 
 bool fa::StateConfiguration::isInitial() const {
@@ -33,26 +32,15 @@ void fa::StateConfiguration::setState(int state) {
     StateConfiguration::state = state;
 }
 
-fa::Transition *fa::StateConfiguration::getFirstTransition() const {
-    return firstTransition;
+void fa::StateConfiguration::setTransition(const std::set<fa::Transition, fa::TransitionComparator> &transition) {
+    StateConfiguration::transition = transition;
 }
 
-void fa::StateConfiguration::setFirstTransition(fa::Transition *firstTransition) {
-    StateConfiguration::firstTransition = firstTransition;
+void fa::StateConfiguration::insertTransition(fa::Transition transition) {
+    this->transition.insert(transition);
 }
-
 
 //Transition's function
-
-fa::Transition::Transition(fa::StateConfiguration *stateFrom, char transition_name, fa::StateConfiguration *stateTo)
-        : stateFrom(stateFrom),
-          transition_name(transition_name),
-          stateTo(stateTo) {}
-
-
-fa::StateConfiguration *fa::Transition::getFrom() const {
-    return stateFrom;
-}
 
 fa::StateConfiguration *fa::Transition::getTo() const {
     return stateTo;
@@ -61,6 +49,9 @@ fa::StateConfiguration *fa::Transition::getTo() const {
 char fa::Transition::getTransition_name() const {
     return transition_name;
 }
+
+fa::Transition::Transition(char transition_name, fa::StateConfiguration *stateTo) : transition_name(transition_name),
+                                                                                    stateTo(stateTo) {}
 
 //Automaton's function
 
@@ -111,6 +102,7 @@ bool fa::Automaton::isStateInitial(int state) const {
 void fa::Automaton::setStateFinal(int state) {
     if (hasState(state)) {
         this->stateCollection.find(state)->second.setFinal(true);
+        this->finalState.insert(state);
     } else {
         std::cerr << "Error: the state doesn't exist." << std::endl;
         exit(EXIT_FAILURE);
@@ -135,9 +127,9 @@ bool fa::Automaton::hasTransition(int from, char alpha, int to) const {
     fa::StateConfiguration cFrom(from);
     fa::StateConfiguration cTo(to);
 
-
-    auto it = this->transitionCollection.find(Transition(&cFrom, alpha, &cTo));
-    return it != this->transitionCollection.end();
+    auto itState = this->stateCollection.find(from);
+    auto it = itState->second.transition.find(Transition(alpha, &cTo));
+    return it != itState->second.transition.end();
 }
 
 void fa::Automaton::addTransition(int from, char alpha, int to) {
@@ -147,24 +139,14 @@ void fa::Automaton::addTransition(int from, char alpha, int to) {
         exit(EXIT_FAILURE);
     }
 
+    this->numberOfTransition++;
     addToAlphabet(alpha);
-    fa::Transition data(&stateCollection.find(from)->second, alpha, &stateCollection.find(to)->second);
+    fa::Transition data(alpha, &stateCollection.find(to)->second);
 
 
     auto state = this->stateCollection.find(from);
 
-    if(state->second.getFirstTransition() == nullptr){
-        this->transitionCollection.insert(data);
-        state->second.setFirstTransition(this->transitionCollection.find(data));
-    }else
-        this->transitionCollection.insert(data);
-
-
-    std::cout << this->transitionCollection.insert(data).first->getTransition_name();
-    std::cout << '\t' << &state->second.getItFirstTransition() ;
-    std::cout << state->second.getItFirstTransition()->getTransition_name() << std::endl;
-
-
+    state->second.insertTransition(data);
 }
 
 
@@ -182,14 +164,24 @@ void fa::Automaton::removeTransition(int from, char alpha, int to) {
                   << "} doesn't exist." << std::endl;
         exit(EXIT_FAILURE);
     }
+    this->numberOfTransition--;
 
-    fa::Transition data(&stateCollection.find(from)->second, alpha, &stateCollection.find(to)->second);
+    StateConfiguration cTo(to);
+    Transition trans(alpha, &cTo);
 
-    transitionCollection.erase(data);
+    this->stateCollection.find(from)->second.transition.erase(trans);
+
+//    auto it = this->stateCollection.find(from);
+//    auto itToErase = it->second.getTransition().find(Transition(alpha, &stateCollection.find(to)->second));
+//    StateConfiguration cTo(to);
+//    this->stateCollection.find(from)->second.getTransition().erase(Transition(alpha, &cTo));
+//
+//        std::cout << this->stateCollection.find(from)->second.getTransition().find(Transition(alpha, &stateCollection.find(to)->second))->getTransition_name() << std::endl;
+
 }
 
 std::size_t fa::Automaton::countTransitions() const {
-    return transitionCollection.size();
+    return this->numberOfTransition;
 }
 
 std::size_t fa::Automaton::getAlphabetSize() const {
@@ -197,170 +189,250 @@ std::size_t fa::Automaton::getAlphabetSize() const {
 }
 
 void fa::Automaton::prettyPrint(std::ostream &os) const {
-    std::set<int> initialState;
-    std::set<int> finalState;
-    std::map<int, std::map<char, std::set<int>>> transition;
 
-    for (auto data : this->transitionCollection) {
+    std::cout << "Initial states:" << std::endl << '\t';
 
-        fa::StateConfiguration *to = data.getTo();
-        fa::StateConfiguration *from = data.getFrom();
-
-        if (to->isInitial())
-            initialState.insert(to->getState());
-
-        if (from->isInitial())
-            initialState.insert(from->getState());
-
-        if (to->isFinal())
-            finalState.insert(to->getState());
-
-        if (from->isFinal())
-            finalState.insert(from->getState());
-
-        transition[from->getState()][data.getTransition_name()].insert(to->getState());
-
+    for (int initial : this->initialState) {
+        std::cout << initial << ' ';
     }
 
-    os << "Initial states:\n\t";
-    for (auto data : initialState) {
-        os << data << ' ';
+    std::cout << std::endl << "Finale states:" << std::endl << '\t';
+
+    for (int final : this->finalState) {
+        std::cout << final << ' ';
     }
 
-    os << "\n\nFinal states: " << std::endl << "\t";
-    for (auto data : finalState) {
-        os << data << ' ';
-    }
+    std::cout << std::endl << "Transitions:" << std::endl;
+    for (auto state : this->stateCollection) {
+        if (state.second.transition.begin() == state.second.transition.end()) continue;
+        char currentTransition = state.second.transition.begin()->getTransition_name();
+        std::cout << "\t\t" << "For state " << state.second.getState() << ':' << std::endl;
+        std::cout << "\t\t\t\t" << "For letter " << currentTransition << ": ";
 
-    std::map<int, StateConfiguration> cpy(this->stateCollection);
-    os << "\n\nTransitions:";
-    auto it1 = transition.begin();
-    while (it1 != transition.end()) {
-        os << "\n\tFor state " << it1->first << ':';
-        cpy.erase(it1->first);
-
-        auto it2 = it1->second.begin();
-        while (it2 != it1->second.end()) {
-            os << "\n\t\tFor letter " << it2->first << ":  ";
-
-            for (auto data : it2->second) {
-                os << data << "  ";
+        for (Transition transition : state.second.transition) {
+            if (transition.getTransition_name() != currentTransition) {
+                currentTransition = transition.getTransition_name();
+                std::cout << std::endl << "\t\t\t\t" << "For letter " << transition.getTransition_name() << ": ";
             }
-            ++it2;
+            std::cout << transition.getTo()->getState() << ' ';
         }
-        ++it1;
-    }
-    for (auto data: cpy) {
-        os << "\n\tFor state " << data.first << ':';
+        std::cout << std::endl;
     }
 
-    os << std::endl;
+
+
+
+
+
+
+
+//    std::set<int> initialState;
+//    std::set<int> finalState;
+//    std::map<int, std::map<char, std::set<int>>> transition;
+//
+//    for (auto data : this->transitionCollection) {
+//
+//        fa::StateConfiguration *to = data.getTo();
+//        fa::StateConfiguration *from = data.getFrom();
+//
+//        if (to->isInitial())
+//            initialState.insert(to->getState());
+//
+//        if (from->isInitial())
+//            initialState.insert(from->getState());
+//
+//        if (to->isFinal())
+//            finalState.insert(to->getState());
+//
+//        if (from->isFinal())
+//            finalState.insert(from->getState());
+//
+//        transition[from->getState()][data.getTransition_name()].insert(to->getState());
+//
+//    }
+//
+//    os << "Initial states:\n\t";
+//    for (auto data : initialState) {
+//        os << data << ' ';
+//    }
+//
+//    os << "\n\nFinal states: " << std::endl << "\t";
+//    for (auto data : finalState) {
+//        os << data << ' ';
+//    }
+//
+//    std::map<int, StateConfiguration> cpy(this->stateCollection);
+//    os << "\n\nTransitions:";
+//    auto it1 = transition.begin();
+//    while (it1 != transition.end()) {
+//        os << "\n\tFor state " << it1->first << ':';
+//        cpy.erase(it1->first);
+//
+//        auto it2 = it1->second.begin();
+//        while (it2 != it1->second.end()) {
+//            os << "\n\t\tFor letter " << it2->first << ":  ";
+//
+//            for (auto data : it2->second) {
+//                os << data << "  ";
+//            }
+//            ++it2;
+//        }
+//        ++it1;
+//    }
+//    for (auto data: cpy) {
+//        os << "\n\tFor state " << data.first << ':';
+//    }
+//
+//    os << std::endl;
 }
 
 void fa::Automaton::dotPrint(std::ostream &os) const {
-    std::set<int> initialState;
-    std::set<int> finalState;
-    std::map<int, std::map<char, std::set<int>>> transition;
-
-    for (auto data : this->transitionCollection) {
-
-        fa::StateConfiguration *to = data.getTo();
-        fa::StateConfiguration *from = data.getFrom();
-
-        if (to->isInitial())
-            initialState.insert(to->getState());
-
-        if (from->isInitial())
-            initialState.insert(from->getState());
-
-        if (to->isFinal())
-            finalState.insert(to->getState());
-
-        if (from->isFinal())
-            finalState.insert(from->getState());
-
-        transition[from->getState()][data.getTransition_name()].insert(to->getState());
-    }
 
     os << "digraph automaton{\n\trankdir=LR;\n\tnode[shape = point, color=white, fontcolor=white];";
-
-    for (auto data : initialState) {
-        os << " start" << data << ';';
+    for (int initial : this->initialState) {
+        os << "start" << initial << ';';
     }
-
 
     os << "\n\tnode [shape = doublecircle, color=black, fontcolor=black];";
-    for (auto data : finalState) {
-        os << ' ' << data << ';';
+    for (int final : this->finalState) {
+        os << final << ';';
     }
 
-    os << std::endl << "\tnode [shape = circle];\n";
+    os << "\n\tnode [shape = circle];\n";
 
-    std::map<int, StateConfiguration> cpy(this->stateCollection);
-    auto it1 = transition.begin();
-    std::set<int> exist;
-    while (it1 != transition.end()) {
-        auto it2 = it1->second.begin();
-        cpy.erase(it1->first);
-        while (it2 != it1->second.end()) {
-            for (auto data : it2->second) {
-                os << '\t';
-                if (initialState.find(it1->first) != initialState.end() && exist.find(it1->first) == exist.end()) {
-                    os << "start" << it1->first << "->" << it1->first << ';' << std::endl << '\t';
-                    exist.insert(it1->first);
-                }
-                os << it1->first << "->";
-                os << data << "  ";
-                os << "[ label = " << it2->first << " ];" << std::endl;
-            }
-            ++it2;
+    for (auto state : this->stateCollection) {
+        bool hasTransition = false;
+        if (state.second.isInitial()) {
+            os << "\tstart" << state.second.getState() << "->" << state.second.getState() << std::endl;
         }
-        ++it1;
-    }
 
-    for (auto data: cpy) {
-        if (!data.second.isFinal()) {
-            os << '\t';
-            os << data.first << ';' << std::endl;
+        for (Transition trans : state.second.transition) {
+            os << '\t' << state.second.getState() << "->" << trans.getTo()->getState() << " [ label = "
+               << trans.getTransition_name() << " ];\n";
+            hasTransition =true;
         }
+
+        if(!hasTransition)
+            os << '\t' << state.second.getState() <<";\n";
     }
 
-
-    for (auto data: cpy) {
-        os << '\t';
-        if (data.second.isFinal())
-            os << "node [shape = doublecircle, color=black, fontcolor=black];" << data.first << ';' << std::endl;
-
-        if (data.second.isInitial()) {
-            os << "node[shape = point, color=white, fontcolor=white]; start" << data.first << ';' << std::endl;
-            os << "\tstart" << data.first << "->" << data.first << ';';
-        }
-    }
 
     os << '}';
-}
 
-const std::set<fa::Transition, fa::TransitionComparator> &fa::Automaton::getTransitionCollection() const {
-    return transitionCollection;
+//    std::set<int> initialState;
+//    std::set<int> finalState;
+//    std::map<int, std::map<char, std::set<int>>> transition;
+//
+//    for (auto data : this->transitionCollection) {
+//
+//        fa::StateConfiguration *to = data.getTo();
+//        fa::StateConfiguration *from = data.getFrom();
+//
+//        if (to->isInitial())
+//            initialState.insert(to->getState());
+//
+//        if (from->isInitial())
+//            initialState.insert(from->getState());
+//
+//        if (to->isFinal())
+//            finalState.insert(to->getState());
+//
+//        if (from->isFinal())
+//            finalState.insert(from->getState());
+//
+//        transition[from->getState()][data.getTransition_name()].insert(to->getState());
+//    }
+//
+//    os << "digraph automaton{\n\trankdir=LR;\n\tnode[shape = point, color=white, fontcolor=white];";
+//
+//    for (auto data : initialState) {
+//        os << " start" << data << ';';
+//    }
+//
+//
+//    os << "\n\tnode [shape = doublecircle, color=black, fontcolor=black];";
+//    for (auto data : finalState) {
+//        os << ' ' << data << ';';
+//    }
+//
+//    os << std::endl << "\tnode [shape = circle];\n";
+//
+//    std::map<int, StateConfiguration> cpy(this->stateCollection);
+//    auto it1 = transition.begin();
+//    std::set<int> exist;
+//    while (it1 != transition.end()) {
+//        auto it2 = it1->second.begin();
+//        cpy.erase(it1->first);
+//        while (it2 != it1->second.end()) {
+//            for (auto data : it2->second) {
+//                os << '\t';
+//                if (initialState.find(it1->first) != initialState.end() && exist.find(it1->first) == exist.end()) {
+//                    os << "start" << it1->first << "->" << it1->first << ';' << std::endl << '\t';
+//                    exist.insert(it1->first);
+//                }
+//                os << it1->first << "->";
+//                os << data << "  ";
+//                os << "[ label = " << it2->first << " ];" << std::endl;
+//            }
+//            ++it2;
+//        }
+//        ++it1;
+//    }
+//
+//    for (auto data: cpy) {
+//        if (!data.second.isFinal()) {
+//            os << '\t';
+//            os << data.first << ';' << std::endl;
+//        }
+//    }
+//
+//
+//    for (auto data: cpy) {
+//        os << '\t';
+//        if (data.second.isFinal())
+//            os << "node [shape = doublecircle, color=black, fontcolor=black];" << data.first << ';' << std::endl;
+//
+//        if (data.second.isInitial()) {
+//            os << "node[shape = point, color=white, fontcolor=white]; start" << data.first << ';' << std::endl;
+//            os << "\tstart" << data.first << "->" << data.first << ';';
+//        }
+//    }
+//
+//    os << '}';
 }
 
 
 bool fa::Automaton::isDeterministic() const {
     if (getAlphabetSize() == 0)
         return true;
-    char beforeTransitionName = (char) NULL;
-    int beforeState = (int) NULL;
 
-    for (Transition data : this->transitionCollection) {
-        if (beforeState == data.getFrom()->getState()) {
-            if (beforeTransitionName == data.getTransition_name())
+    for (std::pair<const int, StateConfiguration> state : this->stateCollection) {
+        char previousTransitionName = (char) NULL;
+        for (Transition trans : state.second.transition) {
+            if (previousTransitionName == trans.getTransition_name()) {
                 return false;
-            beforeTransitionName = data.getTransition_name();
-        } else {
-            beforeTransitionName = data.getTransition_name();
-            beforeState = data.getFrom()->getState();
+            }
+
+            previousTransitionName = trans.getTransition_name();
+
         }
     }
+
+
+
+//    char beforeTransitionName = (char) NULL;
+//    int beforeState = (int) NULL;
+//
+//    for (Transition data : this->transitionCollection) {
+//        if (beforeState == data.getFrom()->getState()) {
+//            if (beforeTransitionName == data.getTransition_name())
+//                return false;
+//            beforeTransitionName = data.getTransition_name();
+//        } else {
+//            beforeTransitionName = data.getTransition_name();
+//            beforeState = data.getFrom()->getState();
+//        }
+//    }
 
     return true;
 }
@@ -368,42 +440,34 @@ bool fa::Automaton::isDeterministic() const {
 bool fa::Automaton::isComplete() const {
     if (getAlphabetSize() == 0)
         return true;
-    char beforeTransitionName = this->transitionCollection.begin()->getTransition_name();
-    int beforeState = this->transitionCollection.begin()->getFrom()->getState();
-    size_t sizeAlphabet = this->getAlphabetSize();
-    size_t countLetter = 1;
-    std::map<int, StateConfiguration> cpyState(this->stateCollection);
 
-    for (Transition data : this->transitionCollection) {
-        if (beforeState == data.getFrom()->getState()) {
-            if (beforeTransitionName == data.getTransition_name())
+    for (std::pair<const int, StateConfiguration> state : this->stateCollection) {
+        char previousTransitionName = (char) NULL;
+        size_t countLetter = 0;
+        for (Transition trans : state.second.transition) {
+            if (previousTransitionName == trans.getTransition_name()) {
                 continue;
-            beforeTransitionName = data.getTransition_name();
-            ++countLetter;
-        } else {
-            cpyState.erase(beforeState);
-            if (countLetter != sizeAlphabet)
-                return false;
-
-            sizeAlphabet = this->getAlphabetSize();
-            beforeTransitionName = data.getTransition_name();
-            beforeState = data.getFrom()->getState();
-            countLetter = 1;
+            } else {
+                countLetter++;
+                previousTransitionName = trans.getTransition_name();
+            }
         }
+
+        if (countLetter != this->getAlphabetSize())
+            return false;
     }
-    cpyState.erase(beforeState);
-    if (countLetter != sizeAlphabet)
-        return false;
-    return cpyState.empty();
+
+    return true;
 }
 
 void fa::Automaton::makeComplete() {
     bool found = false;
+    bool trashStateAlreadyCreated = false;
     int trashState = -1;
     std::map<int, StateConfiguration> cpyState(this->stateCollection);
-    std::map<int, std::set<char>> missingTrans;
+    std::map<int, std::set<char>> missingTransition;
     for (auto data : this->stateCollection) {
-        missingTrans[data.first] = std::set<char>(this->alphabet);
+        missingTransition[data.first] = std::set<char>(this->alphabet);
     }
 
     std::random_device rd;
@@ -417,22 +481,23 @@ void fa::Automaton::makeComplete() {
             trashState = dis(gen);
     }
 
-    for (Transition data : this->transitionCollection) {
-        missingTrans[data.getFrom()->getState()].erase(data.getTransition_name());
-        if (missingTrans.count(data.getFrom()->getState()) == 0)
-            missingTrans.erase(data.getFrom()->getState());
+    for (std::pair<const int, StateConfiguration> state : this->stateCollection) {
+        for (Transition trans : state.second.transition) {
+            missingTransition[state.first].erase(trans.getTransition_name());
+        }
+
+        if (!missingTransition.empty() && !trashStateAlreadyCreated) {
+            this->addState(trashState);
+            trashStateAlreadyCreated = true;
+        }
+
+        for (char transitionName : missingTransition[state.first]) {
+            addTransition(state.first, transitionName, trashState);
+        }
     }
 
-    if (!missingTrans.empty())
-        this->addState(trashState);
-
-    for (auto data : missingTrans) {
-        for (auto alpha : data.second)
-            this->addTransition(data.first, alpha, trashState);
-    }
-
-    for (auto data : this->alphabet)
-        this->addTransition(trashState, data, trashState);
+    for (char transitionName : this->alphabet)
+        this->addTransition(trashState, transitionName, trashState);
 
 }
 
@@ -449,45 +514,38 @@ const std::set<int> &fa::Automaton::getInitialState() const {
 }
 
 bool fa::Automaton::isLanguageEmpty() const {
-    if (this->initialState.empty())
+    if (this->initialState.empty() || this->finalState.empty())
         return false;
 
-
     std::set<int> visited;
-    for (int it0 : this->initialState) {
-        if (visited.find(it0) != visited.end())//TODO: si un etat initial à deja été parcouru soit on à trouver un état final soit on en trouvera jamais => inutile.
+    for (int state : this->initialState) {
+        if (visited.find(state) !=
+            visited.end())//TODO: si un etat initial à deja été parcouru soit on à trouvé un état final soit on en trouvera jamais => inutile.
             continue;
 
-//        if(this->stateCollection.find(it0)->second.isFinal())
-//            return true;
-
-
-        if(this->checkPathToFinalState(this->stateCollection.find(it0)->second, &visited))
-            return true;
+        if (this->checkPathToFinalState(this->stateCollection.find(state)->second, &visited))
+            return false;
 
     }
 
-    return false;
+    return true;
 }
 
 bool fa::Automaton::checkPathToFinalState(fa::StateConfiguration state, std::set<int> *visited) const {
-    std::cout << state.getState() << '\t' << state.isFinal() << std::endl;
     if (state.isFinal())
         return true;
 
     visited->insert(state.getState());
-    std::cout << "ok" << std::endl;
 
-    for (auto it = state.getItFirstTransition(); it->getTo()->getState() != state.getState(); ++it) {
-        std::cout << "ok" << std::endl;
+    std::cout  << visited->size() << std::endl;
 
+    for (Transition trans : state.transition){
 
-        std::cout << it->getTo()->getState() << std::endl;
-        std::cout << "ok" << std::endl;
+        if(visited->find(trans.getTo()->getState()) != visited->end())
+            continue;
 
-        if (this->checkPathToFinalState(*(*it).getTo(), visited))
+        if(this->checkPathToFinalState(*trans.getTo(), visited))
             return true;
-
     }
 
     return false;
@@ -512,10 +570,8 @@ bool fa::StateConfigurationComparator::operator()(const fa::StateConfiguration &
 }
 
 bool fa::TransitionComparator::operator()(const fa::Transition &transition1, const fa::Transition &transition2) const {
-    if (transition1.getFrom()->getState() == transition2.getFrom()->getState()) {
-        if (transition1.getTransition_name() == transition2.getTransition_name())
-            return transition1.getTo()->getState() < transition2.getTo()->getState();
-        return transition1.getTransition_name() < transition2.getTransition_name();
+    if (transition1.getTransition_name() == transition2.getTransition_name()) {
+        return transition1.getTo()->getState() < transition2.getTo()->getState();
     }
-    return transition1.getFrom()->getState() < transition2.getFrom()->getState();
+    return transition1.getTransition_name() < transition2.getTransition_name();
 }

@@ -491,7 +491,6 @@ TEST_F(AutomatonTestFixture, isCompleteTestAutomatonCoAccessible) {
 TEST_F(AutomatonTestFixture, makeCompleteTestNotComplete) {
     size_t size = automatonNotCompleteNotDeterministic.getAlphabetSize();
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.isComplete());
-
     automatonNotCompleteNotDeterministic.makeComplete();
     std::ofstream ofstream1;
     ofstream1.open("../dot/automatonNotCompleteNotDeterministic1.dot");
@@ -501,6 +500,7 @@ TEST_F(AutomatonTestFixture, makeCompleteTestNotComplete) {
     }
     automatonNotCompleteNotDeterministic.dotPrint(ofstream1);
     ofstream1.close();
+
     EXPECT_EQ(size, automatonNotCompleteNotDeterministic.getAlphabetSize());
     EXPECT_TRUE(automatonNotCompleteNotDeterministic.isComplete());
 }
@@ -555,17 +555,6 @@ TEST_F(AutomatonTestFixture, makeComplement) {
 //              Part 3
 //******************************************************
 
-TEST_F(AutomatonTestFixture, toDELELTE) {
-    for (const auto &it : automaton.getTransitionCollection()) {
-        std::cout << it.getFrom()->getState() << '\t' << it.getTransition_name() << '\t' << it.getTo()->getState()
-                  << std::endl;
-    }
-
-
-    std::cout << &automaton.getStateCollection().begin()->second.getItFirstTransition() << std::endl;
-
-}
-
 //isLanguageEmpty
 
 TEST_F(AutomatonTestFixture, isLanguageEmptyAutomate) {
@@ -597,7 +586,7 @@ TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyInutileIsInitial) {
 }
 
 TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoFinal) {
-    EXPECT_TRUE(automatonEmptyNoFinal.isLanguageEmpty());
+    EXPECT_FALSE(automatonEmptyNoFinal.isLanguageEmpty());
 }
 
 TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonInutile) {
