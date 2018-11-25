@@ -78,43 +78,43 @@ protected:
     void intitAutomatonCompleteDeterministic() {
         automatonCompleteDeterministic.addState(0);
         automatonCompleteDeterministic.setStateInitial(0);
-        automatonCompleteDeterministic.addState(2);
-        automatonCompleteDeterministic.setStateFinal(2);
-        automatonCompleteDeterministic.addTransition(0, 'a', 2);
-        automatonCompleteDeterministic.addTransition(0, 'b', 2);
-        automatonCompleteDeterministic.addTransition(2, 'a', 0);
-        automatonCompleteDeterministic.addTransition(2, 'b', 2);
+        automatonCompleteDeterministic.addState(1);
+        automatonCompleteDeterministic.setStateFinal(1);
+        automatonCompleteDeterministic.addTransition(0, 'a', 1);
+        automatonCompleteDeterministic.addTransition(0, 'b', 1);
+        automatonCompleteDeterministic.addTransition(1, 'a', 0);
+        automatonCompleteDeterministic.addTransition(1, 'b', 1);
     }
 
     void initAutomaton() {
         automaton.addState(0);
+        automaton.addState(1);
         automaton.addState(2);
-        automaton.addState(123);
         automaton.addState(3);
-        automaton.addState(8);
+        automaton.addState(4);
         automaton.addState(5);
-        automaton.addState(7);
-        automaton.addState(42);
         automaton.addState(6);
+        automaton.addState(7);
+        automaton.addState(8);
         automaton.setStateInitial(0);
-        automaton.setStateInitial(42);
+        automaton.setStateInitial(2);
         automaton.setStateInitial(8);
-        automaton.setStateFinal(42);
+        automaton.setStateFinal(2);
         automaton.setStateFinal(3);
         automaton.setStateFinal(7);
-        automaton.addTransition(0, 'o', 2);
+        automaton.addTransition(0, 'o', 1);
         automaton.addTransition(0, 'a', 0);
-        automaton.addTransition(0, 'z', 2);
+        automaton.addTransition(0, 'z', 1);
         automaton.addTransition(0, 'u', 8);
         automaton.addTransition(0, (char) 122, 8);
-        automaton.addTransition(2, 'a', 123);
-        automaton.addTransition(2, 'a', 5);
-        automaton.addTransition(3, '7', 2);
-        automaton.addTransition(8, 'v', 2);
+        automaton.addTransition(1, 'a', 4);
+        automaton.addTransition(1, 'a', 5);
+        automaton.addTransition(3, '7', 1);
+        automaton.addTransition(8, 'v', 1);
         automaton.addTransition(5, '0', 0);
         automaton.addTransition(5, '0', 7);
-        automaton.addTransition(7, 'j', 42);
-        automaton.addTransition(3, 'o', 2);
+        automaton.addTransition(7, 'j', 2);
+        automaton.addTransition(3, 'o', 1);
         automaton.addTransition(3, 'j', 7);
     }
 
@@ -134,12 +134,16 @@ protected:
         automatonCoAccessible.addState(2);
         automatonCoAccessible.setStateFinal(2);
         automatonCoAccessible.addState(3);
+        automatonCoAccessible.addState(4);
+        automatonCoAccessible.addState(5);
         automatonCoAccessible.addTransition(1, 'a', 2);
         automatonCoAccessible.addTransition(1, 'b', 2);
         automatonCoAccessible.addTransition(2, 'a', 1);
         automatonCoAccessible.addTransition(2, 'b', 1);
         automatonCoAccessible.addTransition(3, 'a', 1);
         automatonCoAccessible.addTransition(3, 'a', 2);
+        automatonCoAccessible.addTransition(4, 'a', 3);
+        automatonCoAccessible.addTransition(5, 'a', 3);
     }
 
     void initAutomatonEmptyInutileIsInitial() {
@@ -181,10 +185,10 @@ protected:
     fa::Automaton automatonInutile;
     fa::Automaton automatonCoAccessible;
     fa::Automaton automaton;
-    fa::Automaton automatonEmptyInutileIsInitial;//TODO: dot print
-    fa::Automaton automatonEmpty;//TODO: dot print
-    fa::Automaton automatonEmptyNoInitial;//TODO: dot print
-    fa::Automaton automatonEmptyNoFinal;//TODO: dot print
+    fa::Automaton automatonEmptyInutileIsInitial;//TODO: verifier rajouter dans les tests
+    fa::Automaton automatonEmpty;
+    fa::Automaton automatonEmptyNoInitial;
+    fa::Automaton automatonEmptyNoFinal;
 
 };
 
@@ -196,7 +200,7 @@ TEST(AutomatonTest, Empty) {
     EXPECT_EQ(fa.countTransitions(), 0u);
 }
 
-
+//TODO : homogenise comment
 //*************************************************************************************
 //                  AUTOMATON TEST
 //*************************************************************************************
@@ -351,83 +355,25 @@ TEST(AutomatonTest, removeTransitionTestStateExistTransitionDontExist) {
 /**
  * Print an automaton.
  */
-TEST_F(AutomatonTestFixture, prettyPrint) {
-    automaton.prettyPrint(std::cout);
-    std::ofstream ofstream;
-    ofstream.open("../dot/automate.dot");
-    if (!ofstream) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automaton.dotPrint(ofstream);
-    ofstream.close();
-
-    std::ofstream ofstream1;
-    ofstream1.open("../dot/automatonNotCompleteNotDeterministic.dot");
-    if (!ofstream1) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonNotCompleteNotDeterministic.dotPrint(ofstream1);
-    ofstream1.close();
-
-    std::ofstream ofstream2;
-    ofstream2.open("../dot/automatonNotCompleteDeterministic.dot");
-    if (!ofstream2) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonNotCompleteDeterministic.dotPrint(ofstream2);
-    ofstream2.close();
-
-    std::ofstream ofstream3;
-    ofstream3.open("../dot/automatonCompleteNotDeterministic.dot");
-    if (!ofstream3) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonCompleteNotDeterministic.dotPrint(ofstream3);
-    ofstream3.close();
-
-    std::ofstream ofstream5;
-    ofstream5.open("../dot/automatonInutile.dot");
-    if (!ofstream5) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonInutile.dotPrint(ofstream5);
-    ofstream5.close();
-
-    std::ofstream ofstream6;
-    ofstream6.open("../dot/automatonCompleteDeterministic.dot");
-    if (!ofstream6) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonCompleteDeterministic.dotPrint(ofstream6);
-    ofstream6.close();
-
-    std::ofstream ofstream7;
-    ofstream7.open("../dot/automatonCoAccessible.dot");
-    if (!ofstream7) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonCoAccessible.dotPrint(ofstream7);
-    ofstream7.close();
-
-    DOT_PRINT(automatonEmptyInutileIsInitial, std::string("automatonEmptyInutileIsInitial"), ofstream8);
-    DOT_PRINT(automatonEmpty, std::string("automatonEmpty"), ofstream9);
-    DOT_PRINT(automatonEmptyNoInitial, std::string("automatonEmptyNoInitial"), ofstream10);
-    DOT_PRINT(automatonEmptyNoFinal, std::string("automatonEmptyNoFinal"), ofstream11);
-
+TEST_F(AutomatonTestFixture, prettyPrint) {//TODO: le 3eme arg peut etre le meme
+    DOT_PRINT(automaton, std::string("automaton"), ofstream0)
+    DOT_PRINT(automatonNotCompleteNotDeterministic, std::string("automatonNotCompleteNotDeterministic"), ofstream1)
+    DOT_PRINT(automatonNotCompleteDeterministic, std::string("automatonNotCompleteDeterministic"), ofstream2)
+    DOT_PRINT(automatonCompleteNotDeterministic, std::string("automatonCompleteNotDeterministic"), ofstream3)
+    DOT_PRINT(automatonInutile, std::string("automatonInutile"), ofstream4)
+    DOT_PRINT(automatonCompleteDeterministic, std::string("automatonCompleteDeterministic"), ofstream5)
+    DOT_PRINT(automatonCoAccessible, std::string("automatonCoAccessible"), ofstream6)
+    DOT_PRINT(automatonEmptyInutileIsInitial, std::string("automatonEmptyInutileIsInitial"), ofstream7)
+    DOT_PRINT(automatonEmpty, std::string("automatonEmpty"), ofstream8)
+    DOT_PRINT(automatonEmptyNoInitial, std::string("automatonEmptyNoInitial"), ofstream9)
+    DOT_PRINT(automatonEmptyNoFinal, std::string("automatonEmptyNoFinal"), ofstream10)
 }
 
 //******************************************************
 //              Part 2
 //******************************************************
 
-//Deterministic
+//isDeterministic
 
 TEST_F(AutomatonTestFixture, isDeterministicTestAutomatonCompleteDeterministic) {
     EXPECT_TRUE(automatonCompleteDeterministic.isDeterministic());
@@ -457,7 +403,7 @@ TEST_F(AutomatonTestFixture, isDeterministicTestAutomatonCoAccessible) {
     EXPECT_FALSE(automatonCoAccessible.isDeterministic());
 }
 
-//Complete
+//isComplete
 
 TEST_F(AutomatonTestFixture, isCompleteTestAutomatonCompleteDeterministic) {
     EXPECT_TRUE(automatonCompleteDeterministic.isComplete());
@@ -486,40 +432,24 @@ TEST_F(AutomatonTestFixture, isCompleteTestAutomatonInutile) {
 TEST_F(AutomatonTestFixture, isCompleteTestAutomatonCoAccessible) {
     EXPECT_FALSE(automatonCoAccessible.isComplete());
 }
-//make Complete
+//makeComplete
 
 TEST_F(AutomatonTestFixture, makeCompleteTestNotComplete) {
     size_t size = automatonNotCompleteNotDeterministic.getAlphabetSize();
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.isComplete());
     automatonNotCompleteNotDeterministic.makeComplete();
-    std::ofstream ofstream1;
-    ofstream1.open("../dot/automatonNotCompleteNotDeterministic1.dot");
-    if (!ofstream1) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonNotCompleteNotDeterministic.dotPrint(ofstream1);
-    ofstream1.close();
-
     EXPECT_EQ(size, automatonNotCompleteNotDeterministic.getAlphabetSize());
     EXPECT_TRUE(automatonNotCompleteNotDeterministic.isComplete());
+    EXPECT_TRUE(automatonNotCompleteNotDeterministic.match("abaaaaaaaaaaaaaaaaa"));
 }
 
 TEST_F(AutomatonTestFixture, makeCompleteTestAutomaton) {
     size_t size = automaton.getAlphabetSize();
     EXPECT_FALSE(automaton.isComplete());
-
     automaton.makeComplete();
-    std::ofstream ofstream1;
-    ofstream1.open("../dot/automaton1.dot");
-    if (!ofstream1) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automaton.dotPrint(ofstream1);
-    ofstream1.close();
     EXPECT_EQ(size, automaton.getAlphabetSize());
     EXPECT_TRUE(automaton.isComplete());
+    EXPECT_TRUE(automaton.match("aaaaaaaaaaaaoa0j"));
 }
 
 TEST_F(AutomatonTestFixture, makeCompleteTestAlphabetSame) {
@@ -538,14 +468,6 @@ TEST_F(AutomatonTestFixture, makeCompleteTestComplete) {
 
 TEST_F(AutomatonTestFixture, makeComplement) {
     automatonInutile.makeComplement();
-    std::ofstream ofstream;
-    ofstream.open("../dot/automatonInutileComplment.dot");
-    if (!ofstream) {
-        std::cout << "error";
-        exit(EXIT_FAILURE);
-    }
-    automatonInutile.dotPrint(ofstream);
-    ofstream.close();
     EXPECT_TRUE(automatonInutile.isStateFinal(1));
     EXPECT_FALSE(automatonInutile.isStateFinal(2));
     EXPECT_TRUE(automatonInutile.isStateFinal(3));
@@ -586,7 +508,7 @@ TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyInutileIsInitial) {
 }
 
 TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoFinal) {
-    EXPECT_FALSE(automatonEmptyNoFinal.isLanguageEmpty());
+    EXPECT_TRUE(automatonEmptyNoFinal.isLanguageEmpty());
 }
 
 TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonInutile) {
@@ -598,8 +520,385 @@ TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonNotCompleteDeterministic) {
 }
 
 TEST_F(AutomatonTestFixture, isLanguageEmptyAutomatonEmptyNoInitial) {
-    EXPECT_FALSE(automatonEmptyNoInitial.isLanguageEmpty());
+    EXPECT_TRUE(automatonEmptyNoInitial.isLanguageEmpty());
 }
+
+//removeNonAccessibleStates
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomate) {
+    automaton.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)7, automaton.countStates());
+    EXPECT_TRUE(automaton.match("aaaaaaaaaaaaoa0j"));
+
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonCoAccessible) {
+    automatonCoAccessible.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonCoAccessible.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonCompleteDeterministic) {
+    automatonCompleteDeterministic.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonCompleteDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonCompleteNotDeterministic) {
+    automatonCompleteNotDeterministic.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonCompleteDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonNotCompleteNotDeterministic) {
+    automatonNotCompleteNotDeterministic.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)5, automatonNotCompleteNotDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonEmpty) {
+    automatonEmpty.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)1, automatonEmpty.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonEmptyInutileIsInitial) {
+    automatonEmptyInutileIsInitial.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)1, automatonEmptyInutileIsInitial.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonEmptyNoFinal) {
+    automatonEmptyNoFinal.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)1, automatonEmptyNoFinal.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonInutile) {
+    automatonInutile.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonInutile.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonNotCompleteDeterministic) {
+    automatonNotCompleteDeterministic.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)3, automatonNotCompleteDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonAccessibleStatesAutomatonEmptyNoInitial) {
+    automatonEmptyNoInitial.removeNonAccessibleStates();
+    EXPECT_EQ((unsigned)0, automatonEmptyNoInitial.countStates());
+}
+
+//removeNonCoAccessibleStates
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomate) {
+    automaton.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)7, automaton.countStates());
+    EXPECT_TRUE(automaton.match("aaaaaaaaaaaaoa0j"));
+
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonCoAccessible) {
+    automatonCoAccessible.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)5, automatonCoAccessible.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonCompleteDeterministic) {
+    automatonCompleteDeterministic.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonCompleteDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonCompleteNotDeterministic) {
+    automatonCompleteNotDeterministic.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonCompleteDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonNotCompleteNotDeterministic) {
+    automatonNotCompleteNotDeterministic.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)5, automatonNotCompleteNotDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonEmpty) {
+    automatonEmpty.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonEmpty.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonEmptyInutileIsInitial) {
+    automatonEmptyInutileIsInitial.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonEmptyInutileIsInitial.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonEmptyNoFinal) {
+    automatonEmptyNoFinal.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)0, automatonEmptyNoFinal.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonInutile) {
+    automatonInutile.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)2, automatonInutile.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonNotCompleteDeterministic) {
+    automatonNotCompleteDeterministic.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)3, automatonNotCompleteDeterministic.countStates());
+}
+
+TEST_F(AutomatonTestFixture, removeNonCoAccessibleStatesAutomatonEmptyNoInitial) {
+    automatonEmptyNoInitial.removeNonCoAccessibleStates();
+    EXPECT_EQ((unsigned)1, automatonEmptyNoInitial.countStates());
+}
+
+//createProduct.
+
+TEST_F(AutomatonTestFixture, createProduct) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteDeterministic, automatonNotCompleteDeterministic);
+    EXPECT_TRUE(res.isStateInitial(0));
+    EXPECT_FALSE(res.isStateInitial(4));
+    EXPECT_FALSE(res.isStateInitial(5));
+    EXPECT_FALSE(res.isStateInitial(2));
+    EXPECT_FALSE(res.isStateFinal(0));
+    EXPECT_FALSE(res.isStateFinal(4));
+    EXPECT_FALSE(res.isStateFinal(2));
+    EXPECT_TRUE(res.isStateFinal(5));
+}
+
+TEST_F(AutomatonTestFixture, createProduct_match) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteDeterministic, automatonNotCompleteDeterministic);
+    EXPECT_FALSE(res.match("aab"));
+    EXPECT_TRUE(res.match("ab"));
+    EXPECT_TRUE(res.match("abbbbbbb"));
+    EXPECT_TRUE(res.match("abbbbbbbbbbbbbbbbbbbaaab"));
+    EXPECT_FALSE(res.match("aab"));
+    EXPECT_FALSE(res.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(res.match("aaaaaaaaaaaaaaaaa"));
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_FALSE(res.match(""));
+}
+
+
+TEST_F(AutomatonTestFixture, createProductAutomatonCompleteDeterministic) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteDeterministic, automatonCompleteDeterministic);
+    EXPECT_TRUE(res.isStateInitial(0));
+    EXPECT_FALSE(res.isStateInitial(3));
+    EXPECT_FALSE(res.isStateFinal(0));
+    EXPECT_TRUE(res.isStateFinal(3));
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonCompleteDeterministic_match) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteDeterministic, automatonCompleteDeterministic);
+    EXPECT_TRUE(res.match("aab"));
+    EXPECT_TRUE(res.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_FALSE(res.match(""));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+
+TEST_F(AutomatonTestFixture, createProductAutomatonNotCompleteDeterministic) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonNotCompleteDeterministic, automatonNotCompleteDeterministic);
+    EXPECT_EQ((unsigned)3, res.countStates());
+    EXPECT_TRUE(res.isStateInitial(0));
+    EXPECT_FALSE(res.isStateInitial(4));
+    EXPECT_FALSE(res.isStateInitial(8));
+    EXPECT_FALSE(res.isStateFinal(0));
+    EXPECT_FALSE(res.isStateFinal(4));
+    EXPECT_TRUE(res.isStateFinal(8));
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonNotCompleteDeterministic_match) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonNotCompleteDeterministic, automatonNotCompleteDeterministic);
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_FALSE(res.match("aaaaaaaaaaaaaa"));
+    EXPECT_TRUE(res.match("abaaaaaa"));
+    EXPECT_TRUE(res.match("abbbbbbbbbbbbbbbbb"));
+    EXPECT_TRUE(res.match("ab"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonCompleteNotDeterministic) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteNotDeterministic, automatonCompleteNotDeterministic);
+    EXPECT_EQ((unsigned)4, res.countStates());
+    EXPECT_TRUE(res.isStateInitial(0));
+    EXPECT_FALSE(res.isStateInitial(2));
+    EXPECT_FALSE(res.isStateInitial(3));
+    EXPECT_FALSE(res.isStateFinal(0));
+    EXPECT_FALSE(res.isStateFinal(2));
+    EXPECT_TRUE(res.isStateFinal(3));
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonCompleteNotDeterministic_match) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteNotDeterministic, automatonCompleteNotDeterministic);
+    EXPECT_TRUE(res.match("aab"));
+    EXPECT_TRUE(res.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_TRUE(res.match("aaaaaaaaaaaaaaaaa"));
+    EXPECT_TRUE(res.match("aa"));
+    EXPECT_FALSE(res.match(""));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonNotCompleteNotDeterministic) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonNotCompleteNotDeterministic, automatonCompleteNotDeterministic);
+    EXPECT_TRUE(res.match("a"));
+    EXPECT_TRUE(res.match("aaaaaaaaaaaaaabaaaaaaa"));
+    EXPECT_TRUE(res.match("abb"));
+    EXPECT_TRUE(res.match("ab"));
+    EXPECT_TRUE(res.match("aab"));
+    EXPECT_FALSE(res.match("aaaaaaaaaaaaaaaaa"));
+    EXPECT_FALSE(res.match("aa"));
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomaton) {
+    fa::Automaton res = fa::Automaton::createProduct(automaton, automatonNotCompleteNotDeterministic);
+    EXPECT_TRUE(res.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonEmpty) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonEmptyNoFinal, automatonCompleteNotDeterministic);
+    EXPECT_TRUE(res.isLanguageEmpty());
+}
+
+TEST_F(AutomatonTestFixture, createProductAutomatonANDautomatonCoAccessible) {
+    fa::Automaton res = fa::Automaton::createProduct(automatonCompleteDeterministic, automatonCoAccessible);
+
+}
+
+TEST_F(AutomatonTestFixture, createAANDB) {
+    fa::Automaton A;
+    A.addState(0);
+    A.setStateInitial(0);
+    A.addState(1);
+    A.setStateFinal(1);
+    A.addTransition(0, 'a', 1);
+
+    fa::Automaton B;
+    B.addState(0);
+    B.setStateInitial(0);
+    B.addState(1);
+    B.setStateFinal(1);
+    B.addTransition(0, 'b', 1);
+    fa::Automaton res = fa::Automaton::createProduct(A, B);
+    EXPECT_TRUE(res.isLanguageEmpty());
+}
+
+//******************************************************
+//              hasEmptyIntersectionWith
+//******************************************************
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomatonCoAccessible){
+    EXPECT_FALSE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonCoAccessible));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomatonInutile){
+    EXPECT_FALSE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonInutile));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomatonEmpty){
+    EXPECT_TRUE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonEmpty));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomatonNotCompleteNotDeterministic){
+    EXPECT_FALSE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonNotCompleteNotDeterministic));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomatonEmptyNoInitial){
+    EXPECT_TRUE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonEmptyNoInitial));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomatonEmptyNoFinal){
+    EXPECT_TRUE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonEmptyNoFinal));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonANDAutomaton){
+    EXPECT_TRUE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automaton));
+}
+
+TEST_F(AutomatonTestFixture, hasEmptyIntersectionWithAutomatonEmptyANDAutomatonEmptyInutileIsInitial){
+    EXPECT_TRUE(automatonCompleteDeterministic.hasEmptyIntersectionWith(automatonEmptyInutileIsInitial));
+}
+
+//******************************************************
+//              readString
+//******************************************************
+
+TEST_F(AutomatonTestFixture, readString){
+    std::set<int> res = automaton.readString("za0");
+    EXPECT_TRUE(res.find(0) != res.end());
+    EXPECT_TRUE(res.find(1) != res.end());
+    EXPECT_TRUE(res.find(5) != res.end());
+    EXPECT_TRUE(res.find(7) != res.end());
+    EXPECT_EQ((unsigned)4, res.size());
+}
+
+TEST_F(AutomatonTestFixture, readStringEmptyWord){
+    std::set<int> res = automaton.readString("");
+    EXPECT_TRUE(res.find(2) != res.end());
+}
+//TODO: tester NULL partout.
+//******************************************************
+//              match
+//******************************************************
+
+TEST_F(AutomatonTestFixture, matchAutomaton){
+    EXPECT_TRUE(automaton.match("za0j"));
+//    EXPECT_FALSE(automaton.match(nullptr));
+    EXPECT_TRUE(automaton.match("za0"));
+    EXPECT_TRUE(automaton.match(""));
+    EXPECT_FALSE(automaton.match("za"));
+    EXPECT_FALSE(automaton.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, matchAutomatonCoAccessible){
+    EXPECT_TRUE(automatonCoAccessible.match("aab"));
+    EXPECT_TRUE(automatonCoAccessible.match("a"));
+    EXPECT_FALSE(automatonCoAccessible.match("aa"));
+    EXPECT_FALSE(automatonCoAccessible.match(""));
+    EXPECT_FALSE(automatonCoAccessible.match("hniure"));
+}
+
+
+TEST_F(AutomatonTestFixture, matchAutomatonCompleteDeterministic){
+    EXPECT_TRUE(automatonCompleteDeterministic.match("aab"));
+    EXPECT_TRUE(automatonCompleteDeterministic.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(automatonCompleteDeterministic.match("aa"));
+    EXPECT_FALSE(automatonCompleteDeterministic.match(""));
+    EXPECT_FALSE(automatonCompleteDeterministic.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, matchAutomatonCompleteNotDeterministic){
+    EXPECT_TRUE(automatonCompleteNotDeterministic.match("aab"));
+    EXPECT_TRUE(automatonCompleteNotDeterministic.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_TRUE(automatonCompleteNotDeterministic.match("aaaaaaaaaaaaaaaaa"));
+    EXPECT_TRUE(automatonCompleteNotDeterministic.match("aa"));
+    EXPECT_FALSE(automatonCompleteNotDeterministic.match(""));
+    EXPECT_FALSE(automatonCompleteNotDeterministic.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, matchAutomatonEmpty){
+    EXPECT_FALSE(automatonEmpty.match(""));
+    EXPECT_FALSE(automatonEmpty.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(automatonEmpty.match("aa"));
+    EXPECT_FALSE(automatonEmpty.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, matchAutomatonInutile){
+    EXPECT_FALSE(automatonInutile.match("aa"));
+    EXPECT_TRUE(automatonInutile.match("aaaaaaaaaaaaa"));
+    EXPECT_FALSE(automatonInutile.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(automatonInutile.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, matchAutomatonNotCompleteDeterministic){
+    EXPECT_FALSE(automatonNotCompleteDeterministic.match("aa"));
+    EXPECT_FALSE(automatonNotCompleteDeterministic.match("aaaaaaaaaaaaaa"));
+    EXPECT_FALSE(automatonNotCompleteDeterministic.match("aaaaaaaaaaaaaab"));
+    EXPECT_TRUE(automatonNotCompleteDeterministic.match("abbbbbbbbbbbbbbbbb"));
+    EXPECT_TRUE(automatonNotCompleteDeterministic.match("ab"));
+    EXPECT_TRUE(automatonNotCompleteDeterministic.match("abaaaaaaaaaaaaaaa"));
+    EXPECT_FALSE(automatonNotCompleteDeterministic.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, matchAutomatonNotCompleteNotDeterministic){
+    EXPECT_TRUE(automatonNotCompleteNotDeterministic.match("a"));
+    EXPECT_TRUE(automatonNotCompleteNotDeterministic.match("aaaaaaaaaaaaaabaaaaaaa"));
+    EXPECT_TRUE(automatonNotCompleteNotDeterministic.match("abb"));
+    EXPECT_TRUE(automatonNotCompleteNotDeterministic.match("ab"));
+    EXPECT_FALSE(automatonNotCompleteNotDeterministic.match("aaaaaaaaaaaaaaaaaaa"));
+    EXPECT_FALSE(automatonNotCompleteNotDeterministic.match("hniure"));
+}
+
 
 
 int main(int argc, char **argv) {

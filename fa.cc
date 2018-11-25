@@ -74,18 +74,26 @@ int main() {
 //    for(auto it = cpy.begin(); it != cpy.end(); ++it)
 //        std::cout << it->first << "   " << it->second << std::endl;
 //
+//
+//    fa::StateConfiguration s(1);
+//
+//    std::set<fa::StateConfiguration *> a;
+//
+//    int z = 3;
+//
+//    a.insert(&s);
+//
+//
+//
+//    foo0();
 
-    fa::StateConfiguration s(1);
+    std::map<int, int> col;
 
-    std::set<fa::StateConfiguration *> a;
-
-    int z = 3;
-
-    a.insert(&s);
-
-
-
-    foo0();
+    for(auto it : col){
+        std::cout << it.second << ' ' << it.first <<std::endl;
+        it.second = 6;
+    }
 
     return 0;
 }
+

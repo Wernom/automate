@@ -2,7 +2,6 @@
 #define AUTOMATE_AUTOMATON_H
 
 
-
 #include <vector>
 #include <map>
 #include <set>
@@ -26,11 +25,11 @@ namespace fa {
         bool initial;
         bool final;
         int state;
+        int dial;
 
     public:
 
         std::set<Transition, fa::TransitionComparator> transition;
-
 
         bool isInitial() const;
 
@@ -49,6 +48,11 @@ namespace fa {
         void insertTransition(Transition transition);
 
         explicit StateConfiguration(int state);
+
+        int getDial() const;
+
+        void setDial(int dial);
+
 
     };
 
@@ -86,14 +90,13 @@ namespace fa {
         std::set<int> initialState;
         std::set<int> finalState;
         std::map<int, StateConfiguration> stateCollection;// int the state, StateConfiguration the configuration of the state.
-//        std::set<Transition, fa::TransitionComparator> transitionCollection; //int -> start node, state -> the transitionCollection state value. This collection is sorted by TransitionComparator.
-
 
     public:
-//        const std::set<Transition, TransitionComparator> &getTransitionCollection() const;
         const std::set<int> &getInitialState() const;
+
         const std::map<int, StateConfiguration> &getStateCollection() const;
 
+        const std::pair<const int, fa::StateConfiguration> &findByDial(int dial) const;
 
 
         /**
@@ -301,13 +304,90 @@ namespace fa {
          *
          * Expected  complexity: O(n)
          */
-        bool isLanguageEmpty () const;
+        bool isLanguageEmpty() const;
 
         /**
          * Check if a path exist between an intial and a final state.
          *
          */
-        bool checkPathToFinalState (StateConfiguration state, std::set<int> *visited) const;
+        bool checkPathToFinalState(StateConfiguration state, std::set<int> *visited) const;
+
+        /**
+         * Remove non-accessible  states
+         *
+         * Expected complexity: O(n)
+         */
+        void removeNonAccessibleStates();
+
+
+        /**
+         * Go through the automaton from initials state and copy the covered states in a new set.
+         *
+         * @param visited Set of visited state
+         * @param idState The new collection of state
+         */
+        void createAutomatonWithoutNonAccessibleStates(std::set<int> *visited,
+                                                       fa::StateConfiguration state);
+
+        /**
+         * Remove non-co-accessible states
+         *
+         * Expected complexity: O(n)
+         */
+        void removeNonCoAccessibleStates();
+
+
+        bool createAutomatonWithoutNonCoAccessibleStates(std::set<int> *visited,
+                                                         fa::StateConfiguration state);
+
+
+        //*******************************************************
+        //                  Part 4
+        //*******************************************************
+
+        /**
+         * Create  the  product  of two  automata
+         *
+         * The  resulting  alphabet  is the  intersection  of the
+         * two  alphabets
+         *
+         * Expected  complexity: O(n_1 * n_2)
+         */
+        static Automaton createProduct(const Automaton &lhs, const Automaton &rhs);
+
+        static void createProductRec(const fa::Automaton &lhs, const fa::Automaton &rhs, std::set<int> stateToAdd,
+                                     fa::Automaton *aut, int stateAmountProduct);
+
+        /**
+         * Tell if the  intersection  with  another  automaton  is
+         * empty
+         */
+        bool hasEmptyIntersectionWith(const Automaton &other) const;
+
+        //*******************************************************
+        //                  Part 5
+        //*******************************************************
+
+
+        /**
+         * Read  the  string  and  compute  the  state  set  after
+         * traversing  the  automaton
+         */
+        std::set<int> readString(const std::string &word) const;
+
+        bool readStringRec(const std::string &word, unsigned at, StateConfiguration state, std::set<int> *deriv) const;
+
+        /**
+         * Tell if the  word is in the  language  accepted  by the
+         * automaton
+         */
+        bool match(const std::string &word) const;
+
+        /**
+         * Create a deterministic  automaton  from  another
+         * possibly non -deterministic  automaton
+         */
+        static Automaton createDeterministic(const Automaton &automaton);
 
     };
 

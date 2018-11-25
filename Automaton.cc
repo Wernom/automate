@@ -40,6 +40,22 @@ void fa::StateConfiguration::insertTransition(fa::Transition transition) {
     this->transition.insert(transition);
 }
 
+void fa::StateConfiguration::setDial(int dial) {
+    StateConfiguration::dial = dial;
+}
+
+int fa::StateConfiguration::getDial() const {
+    return this->dial;
+}
+
+//int fa::StateConfiguration::getDial() const {
+//    return dial;
+//}
+//
+//void fa::StateConfiguration::setDial(int dial) {
+//    StateConfiguration::dial = dial;
+//}
+
 //Transition's function
 
 fa::StateConfiguration *fa::Transition::getTo() const {
@@ -57,15 +73,18 @@ fa::Transition::Transition(char transition_name, fa::StateConfiguration *stateTo
 
 void fa::Automaton::addState(int state) {
     if (hasState(state)) {
-        std::cerr << "This state is already in the Automaton" << std::endl;
+        std::cerr << "The state " << state << " is already in the Automaton" << std::endl;
     } else {
         fa::StateConfiguration s(state);
+        s.setDial((int) this->countStates());
         this->stateCollection.insert(std::pair<int, fa::StateConfiguration>(state, s));
     }
 }
 
 void fa::Automaton::removeState(int state) {
     this->stateCollection.erase(state);
+    this->initialState.erase(state);
+    this->finalState.erase(state);
 }
 
 bool fa::Automaton::hasState(int state) const {
@@ -86,7 +105,7 @@ void fa::Automaton::setStateInitial(int state) {
         this->stateCollection.find(state)->second.setInitial(true);
         this->initialState.insert(state);
     } else {
-        std::cerr << "Error: the state doesn't exist." << std::endl;
+        std::cerr << "Error: the state " << state << " doesn't exist." << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -95,7 +114,7 @@ bool fa::Automaton::isStateInitial(int state) const {
     if (hasState(state)) {
         return this->stateCollection.find(state)->second.isInitial();
     }
-    std::cerr << "Error: the state doesn't exist." << std::endl;
+    std::cerr << "Error: the state " << state << " doesn't exist." << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -104,7 +123,7 @@ void fa::Automaton::setStateFinal(int state) {
         this->stateCollection.find(state)->second.setFinal(true);
         this->finalState.insert(state);
     } else {
-        std::cerr << "Error: the state doesn't exist." << std::endl;
+        std::cerr << "Error: the state " << state << " doesn't exist." << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -114,7 +133,7 @@ bool fa::Automaton::isStateFinal(int state) const {
         return this->stateCollection.find(state)->second.isFinal();
     }
 
-    std::cerr << "Error: the state doesn't exist." << std::endl;
+    std::cerr << "Error: the state " << state << "doesn't exist." << std::endl;
     exit(1);
 }
 
@@ -188,7 +207,7 @@ std::size_t fa::Automaton::getAlphabetSize() const {
     return alphabet.size();
 }
 
-void fa::Automaton::prettyPrint(std::ostream &os) const {
+void fa::Automaton::prettyPrint(std::ostream &os) const {//TODO: do test
 
     std::cout << "Initial states:" << std::endl << '\t';
 
@@ -218,72 +237,6 @@ void fa::Automaton::prettyPrint(std::ostream &os) const {
         }
         std::cout << std::endl;
     }
-
-
-
-
-
-
-
-
-//    std::set<int> initialState;
-//    std::set<int> finalState;
-//    std::map<int, std::map<char, std::set<int>>> transition;
-//
-//    for (auto data : this->transitionCollection) {
-//
-//        fa::StateConfiguration *to = data.getTo();
-//        fa::StateConfiguration *from = data.getFrom();
-//
-//        if (to->isInitial())
-//            initialState.insert(to->getState());
-//
-//        if (from->isInitial())
-//            initialState.insert(from->getState());
-//
-//        if (to->isFinal())
-//            finalState.insert(to->getState());
-//
-//        if (from->isFinal())
-//            finalState.insert(from->getState());
-//
-//        transition[from->getState()][data.getTransition_name()].insert(to->getState());
-//
-//    }
-//
-//    os << "Initial states:\n\t";
-//    for (auto data : initialState) {
-//        os << data << ' ';
-//    }
-//
-//    os << "\n\nFinal states: " << std::endl << "\t";
-//    for (auto data : finalState) {
-//        os << data << ' ';
-//    }
-//
-//    std::map<int, StateConfiguration> cpy(this->stateCollection);
-//    os << "\n\nTransitions:";
-//    auto it1 = transition.begin();
-//    while (it1 != transition.end()) {
-//        os << "\n\tFor state " << it1->first << ':';
-//        cpy.erase(it1->first);
-//
-//        auto it2 = it1->second.begin();
-//        while (it2 != it1->second.end()) {
-//            os << "\n\t\tFor letter " << it2->first << ":  ";
-//
-//            for (auto data : it2->second) {
-//                os << data << "  ";
-//            }
-//            ++it2;
-//        }
-//        ++it1;
-//    }
-//    for (auto data: cpy) {
-//        os << "\n\tFor state " << data.first << ':';
-//    }
-//
-//    os << std::endl;
 }
 
 void fa::Automaton::dotPrint(std::ostream &os) const {
@@ -309,96 +262,13 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
         for (Transition trans : state.second.transition) {
             os << '\t' << state.second.getState() << "->" << trans.getTo()->getState() << " [ label = "
                << trans.getTransition_name() << " ];\n";
-            hasTransition =true;
+            hasTransition = true;
         }
 
-        if(!hasTransition)
-            os << '\t' << state.second.getState() <<";\n";
+        if (!hasTransition)
+            os << '\t' << state.second.getState() << ";\n";
     }
-
-
     os << '}';
-
-//    std::set<int> initialState;
-//    std::set<int> finalState;
-//    std::map<int, std::map<char, std::set<int>>> transition;
-//
-//    for (auto data : this->transitionCollection) {
-//
-//        fa::StateConfiguration *to = data.getTo();
-//        fa::StateConfiguration *from = data.getFrom();
-//
-//        if (to->isInitial())
-//            initialState.insert(to->getState());
-//
-//        if (from->isInitial())
-//            initialState.insert(from->getState());
-//
-//        if (to->isFinal())
-//            finalState.insert(to->getState());
-//
-//        if (from->isFinal())
-//            finalState.insert(from->getState());
-//
-//        transition[from->getState()][data.getTransition_name()].insert(to->getState());
-//    }
-//
-//    os << "digraph automaton{\n\trankdir=LR;\n\tnode[shape = point, color=white, fontcolor=white];";
-//
-//    for (auto data : initialState) {
-//        os << " start" << data << ';';
-//    }
-//
-//
-//    os << "\n\tnode [shape = doublecircle, color=black, fontcolor=black];";
-//    for (auto data : finalState) {
-//        os << ' ' << data << ';';
-//    }
-//
-//    os << std::endl << "\tnode [shape = circle];\n";
-//
-//    std::map<int, StateConfiguration> cpy(this->stateCollection);
-//    auto it1 = transition.begin();
-//    std::set<int> exist;
-//    while (it1 != transition.end()) {
-//        auto it2 = it1->second.begin();
-//        cpy.erase(it1->first);
-//        while (it2 != it1->second.end()) {
-//            for (auto data : it2->second) {
-//                os << '\t';
-//                if (initialState.find(it1->first) != initialState.end() && exist.find(it1->first) == exist.end()) {
-//                    os << "start" << it1->first << "->" << it1->first << ';' << std::endl << '\t';
-//                    exist.insert(it1->first);
-//                }
-//                os << it1->first << "->";
-//                os << data << "  ";
-//                os << "[ label = " << it2->first << " ];" << std::endl;
-//            }
-//            ++it2;
-//        }
-//        ++it1;
-//    }
-//
-//    for (auto data: cpy) {
-//        if (!data.second.isFinal()) {
-//            os << '\t';
-//            os << data.first << ';' << std::endl;
-//        }
-//    }
-//
-//
-//    for (auto data: cpy) {
-//        os << '\t';
-//        if (data.second.isFinal())
-//            os << "node [shape = doublecircle, color=black, fontcolor=black];" << data.first << ';' << std::endl;
-//
-//        if (data.second.isInitial()) {
-//            os << "node[shape = point, color=white, fontcolor=white]; start" << data.first << ';' << std::endl;
-//            os << "\tstart" << data.first << "->" << data.first << ';';
-//        }
-//    }
-//
-//    os << '}';
 }
 
 
@@ -417,23 +287,6 @@ bool fa::Automaton::isDeterministic() const {
 
         }
     }
-
-
-
-//    char beforeTransitionName = (char) NULL;
-//    int beforeState = (int) NULL;
-//
-//    for (Transition data : this->transitionCollection) {
-//        if (beforeState == data.getFrom()->getState()) {
-//            if (beforeTransitionName == data.getTransition_name())
-//                return false;
-//            beforeTransitionName = data.getTransition_name();
-//        } else {
-//            beforeTransitionName = data.getTransition_name();
-//            beforeState = data.getFrom()->getState();
-//        }
-//    }
-
     return true;
 }
 
@@ -501,7 +354,7 @@ void fa::Automaton::makeComplete() {
 
 }
 
-void fa::Automaton::makeComplement() {
+void fa::Automaton::makeComplement() {//TODO: doit etre deterministe + complet
 
     for (auto &data : this->stateCollection) {
         data.second.setFinal(!data.second.isFinal());
@@ -515,13 +368,14 @@ const std::set<int> &fa::Automaton::getInitialState() const {
 
 bool fa::Automaton::isLanguageEmpty() const {
     if (this->initialState.empty() || this->finalState.empty())
-        return false;
+        return true;
 
     std::set<int> visited;
     for (int state : this->initialState) {
-        if (visited.find(state) !=
-            visited.end())//TODO: si un etat initial à deja été parcouru soit on à trouvé un état final soit on en trouvera jamais => inutile.
+        if (visited.find(state) != visited.end()) {
+            std::cout << "rxetcyfvguhbinj" << std::endl;
             continue;
+        }//TODO: si un etat initial à deja été parcouru soit on à trouvé un état final soit on en trouvera jamais => inutile.
 
         if (this->checkPathToFinalState(this->stateCollection.find(state)->second, &visited))
             return false;
@@ -537,14 +391,12 @@ bool fa::Automaton::checkPathToFinalState(fa::StateConfiguration state, std::set
 
     visited->insert(state.getState());
 
-    std::cout  << visited->size() << std::endl;
+    for (Transition trans : state.transition) {
 
-    for (Transition trans : state.transition){
-
-        if(visited->find(trans.getTo()->getState()) != visited->end())
+        if (visited->find(trans.getTo()->getState()) != visited->end())
             continue;
 
-        if(this->checkPathToFinalState(*trans.getTo(), visited))
+        if (this->checkPathToFinalState(*trans.getTo(), visited))
             return true;
     }
 
@@ -555,6 +407,204 @@ const std::map<int, fa::StateConfiguration> &fa::Automaton::getStateCollection()
     return stateCollection;
 }
 
+void fa::Automaton::removeNonAccessibleStates() {
+    if (this->initialState.empty()) {
+        this->stateCollection.clear();
+    }
+    std::set<int> visited;
+    std::map<int, StateConfiguration> newStateCollection;
+    for (int state : this->initialState) {
+        createAutomatonWithoutNonAccessibleStates(&visited,
+                                                  this->stateCollection.find(state)->second);
+    }
+
+    for (auto it : this->stateCollection) {
+        if (visited.find(it.second.getState()) == visited.end()) {
+            this->removeState(it.second.getState());
+        }
+
+    }
+
+
+}
+
+void fa::Automaton::createAutomatonWithoutNonAccessibleStates(std::set<int> *visited,
+                                                              fa::StateConfiguration state) {
+
+    if (visited->find(state.getState()) != visited->end())
+        return;
+
+    visited->insert(state.getState());
+    for (Transition trans : state.transition) {
+        createAutomatonWithoutNonAccessibleStates(visited, *trans.getTo());
+    }
+}
+
+
+void fa::Automaton::removeNonCoAccessibleStates() {
+//TODO: getFinal if empty ->state clear
+
+    std::set<int> visited;
+    for (auto state : this->stateCollection) {
+        if (visited.find(state.second.getState()) != visited.end())
+            continue;
+        createAutomatonWithoutNonCoAccessibleStates(&visited, state.second);
+    }
+}
+
+bool fa::Automaton::createAutomatonWithoutNonCoAccessibleStates(std::set<int> *visited,
+                                                                fa::StateConfiguration state) {
+    visited->insert(state.getState());
+    if (state.isFinal()) {
+        return true;
+    }
+
+    bool isCoAccessible = false;
+    for (Transition trans : state.transition) {
+        if (visited->find(trans.getTo()->getState()) != visited->end()) {
+            isCoAccessible = true;
+        } else
+            isCoAccessible =
+                    isCoAccessible | this->createAutomatonWithoutNonCoAccessibleStates(visited, *trans.getTo());
+    }
+
+    if (!isCoAccessible) {
+        this->removeState(state.getState());
+    }
+
+    return isCoAccessible;
+}
+
+fa::Automaton fa::Automaton::createProduct(const fa::Automaton &lhs, const fa::Automaton &rhs) {
+
+    Automaton res;
+    if (lhs.isLanguageEmpty() || rhs.isLanguageEmpty()) {//oui c'est un tapis mais sinon ca crache.
+        res.addState(0);
+        res.setStateInitial(0);
+        return res;
+    }
+    std::set<int> newState;
+    int stateAmountProcuct = (int) (rhs.countStates() * lhs.countStates());
+
+    for (auto stateLhs : lhs.getInitialState()) {
+        for (auto stateRhs : rhs.getInitialState()) {
+            int state = lhs.getStateCollection().find(stateLhs)->second.getDial() * (int) rhs.countStates() +
+                        rhs.getStateCollection().find(stateRhs)->second.getDial();
+            newState.insert(state);
+            res.addState(state);
+            res.setStateInitial(state);
+        }
+    }
+
+    createProductRec(lhs, rhs, newState, &res, stateAmountProcuct);
+
+    return res;
+}
+
+void fa::Automaton::createProductRec(const fa::Automaton &lhs, const fa::Automaton &rhs, std::set<int> stateToAdd,
+                                     fa::Automaton *aut, int stateAmountProduct) {
+    if (stateToAdd.empty()) {
+        return;
+    }
+
+    std::set<int> newStateCollection;
+
+    for (int state : stateToAdd) {
+        if (aut->getStateCollection().find(state) == aut->getStateCollection().end()) {
+            continue;
+        }
+
+        for (auto transLhs : lhs.findByDial(
+                state / (int) rhs.countStates()).second.transition) { //TODO SIGSEGV si automate empty.
+            for (auto transRhs : rhs.findByDial(state % (int) rhs.countStates()).second.transition) {
+                int newState =
+                        transLhs.getTo()->getDial() * (int) rhs.countStates() + transRhs.getTo()->getDial();
+                if (transLhs.getTransition_name() == transRhs.getTransition_name()) {
+                    if (aut->getStateCollection().find(newState) == aut->getStateCollection().end()) {
+                        aut->addState(newState);
+                        if (transLhs.getTo()->isInitial() && transRhs.getTo()->isInitial())
+                            aut->setStateInitial(newState);
+                        if (transLhs.getTo()->isFinal() && transRhs.getTo()->isFinal())
+                            aut->setStateFinal(newState);
+
+                        newStateCollection.insert(newState);
+                    }
+
+                    aut->addTransition(state, transLhs.getTransition_name(), newState);
+                }
+            }
+        }
+    }
+    createProductRec(lhs, rhs, newStateCollection, aut, stateAmountProduct);
+}
+
+bool fa::Automaton::hasEmptyIntersectionWith(const fa::Automaton &other) const {
+    Automaton res = createProduct(*this, other);
+    return res.isLanguageEmpty();
+}
+
+const std::pair<const int, fa::StateConfiguration> &fa::Automaton::findByDial(int dial) const {
+    for (auto &it : this->stateCollection) {
+        if (it.second.getDial() == dial)
+            return it;
+    }
+    return *this->stateCollection.end();
+}
+
+
+std::set<int> fa::Automaton::readString(const std::string &word) const {
+    std::set<int> deriv;
+
+    if (word.empty()){
+        for (auto state : this->initialState){
+            if (this->stateCollection.find(state)->second.isFinal()){
+                deriv.insert(state);
+                return deriv;
+            }
+        }
+        return deriv;
+    }
+
+    for (auto state : this->initialState) {
+
+        for (auto trans : this->stateCollection.find(state)->second.transition) {
+            if (word.at(0) == trans.getTransition_name()){
+                if (readStringRec(word, 1, *trans.getTo(), &deriv)){
+                    deriv.insert(state);
+                    return deriv;
+                }
+            }
+
+            deriv.clear();
+        }
+    }
+
+    return std::set<int>();
+}
+
+bool fa::Automaton::readStringRec(const std::string &word, unsigned at, StateConfiguration state, std::set<int> *deriv) const {
+    if(at >= word.length()){
+        if (state.isFinal()){
+            deriv->insert(state.getState());
+            return true;
+        }
+        return false;
+    }
+    for (auto trans : state.transition){
+        if (word.at(at) == trans.getTransition_name()){
+            if(readStringRec(word, at + 1, *trans.getTo(), deriv)){
+                deriv->insert(state.getState());
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool fa::Automaton::match(const std::string &word) const {
+    std::set<int> res = readString(word);
+    return !res.empty();
+}
 
 
 //******************************************************************
