@@ -431,6 +431,7 @@ namespace fa {
 
         static void createWithoutEpsilonRec(fa::Automaton &automaton, StateConfiguration &state, fa::StateConfiguration &stateTo);
 
+        static Automaton cpyAutomaton(const Automaton &automaton);
 
     };
 

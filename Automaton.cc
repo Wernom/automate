@@ -719,7 +719,9 @@ fa::Automaton fa::Automaton::createMinimalMoore(const fa::Automaton &automaton) 
 
 fa::Automaton fa::Automaton::createWithoutEpsilon(const fa::Automaton &automaton) {
 
-    fa::Automaton res = automaton;
+    fa::Automaton res = cpyAutomaton(automaton);
+
+
     for (auto state : res.getStateCollection()){
         for (auto transition : state.second.transition){
             if (transition.getTransition_name() == '\0'){
@@ -738,7 +740,6 @@ fa::Automaton fa::Automaton::createWithoutEpsilon(const fa::Automaton &automaton
 }
 
 void fa::Automaton::createWithoutEpsilonRec(fa::Automaton &automaton, fa::StateConfiguration &stateRemoveEpsilon, fa::StateConfiguration &stateTo) {
-    std::cout << "state: " << stateTo.getState() << std::endl;
     if (stateTo.getState() == stateRemoveEpsilon.getState())
         return;
 
@@ -746,10 +747,38 @@ void fa::Automaton::createWithoutEpsilonRec(fa::Automaton &automaton, fa::StateC
         if (transition.getTransition_name() == '\0'){
             createWithoutEpsilonRec(automaton, stateRemoveEpsilon, *transition.getTo());
         }else{
+            if (automaton.hasTransition(stateRemoveEpsilon.getState(), transition.getTransition_name(), transition.getTo()->getState()))
+                continue;
+
             automaton.addTransition(stateRemoveEpsilon.getState(), transition.getTransition_name(), transition.getTo()->getState());
         }
     }
 }
+
+fa::Automaton fa::Automaton::cpyAutomaton(const fa::Automaton &automaton) {
+    fa::Automaton res;
+
+    for (auto state : automaton.stateCollection){
+        if (res.stateCollection.find(state.first) == res.stateCollection.end())
+            res.addState(state.first);
+
+        if (state.second.isFinal())
+            res.setStateFinal(state.first);
+
+        if (state.second.isInitial())
+            res.setStateInitial(state.first);
+
+        for(auto trans : state.second.transition){
+            if (res.stateCollection.find(trans.getTo()->getState()) == res.stateCollection.end())
+                res.addState(trans.getTo()->getState());
+            res.addTransition(state.first, trans.getTransition_name(), trans.getTo()->getState());
+
+        }
+    }
+
+    return res;
+}
+
 
 
 

@@ -837,6 +837,7 @@ TEST_F(AutomatonTestFixture, matchAutomaton){
     EXPECT_TRUE(automaton.match("za0j"));
 //    EXPECT_FALSE(automaton.match(nullptr));
     EXPECT_TRUE(automaton.match("za0"));
+    EXPECT_TRUE(automaton.match("za0za0"));
     EXPECT_TRUE(automaton.match(""));
     EXPECT_FALSE(automaton.match("za"));
     EXPECT_FALSE(automaton.match("hniure"));
@@ -1080,8 +1081,8 @@ TEST(AutomatonTest, createWithoutEpsilonAutomatonEpsiloBoucleEpsilonMatchn){
     automatonEpsilon.addTransition(7, 'j', 2);
     automatonEpsilon.addTransition(3, 'o', 1);
     automatonEpsilon.addTransition(3, 'j', 7);
-    fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilon);
     DOT_PRINT(automatonEpsilon, std::string("res"), ofstream)
+    fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilon);
     DOT_PRINT(res, std::string("res123"), ofstream1)
 
 
@@ -1125,12 +1126,14 @@ TEST(AutomatonTest, createWithoutEpsilonAutomatonEpsilomatch){
     automatonEpsilon.addTransition(3, 'j', 7);
     fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilon);
     DOT_PRINT(automatonEpsilon, std::string("res"), ofstream)
-    DOT_PRINT(res, std::string("res123"), ofstream1)
+    DOT_PRINT(res, std::string("res1234"), ofstream1)
 
 
     EXPECT_TRUE(res.match("0j"));
+    EXPECT_TRUE(res.match("o0"));
     EXPECT_TRUE(res.match("0"));
-    EXPECT_TRUE(res.match("PoPuvO"));
+//    EXPECT_TRUE(res.match("PoPuv0"));
+    EXPECT_TRUE(res.match("uv0"));
     EXPECT_TRUE(res.match(""));
     EXPECT_FALSE(res.match("za"));
     EXPECT_FALSE(res.match("hniure"));
