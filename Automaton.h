@@ -8,6 +8,8 @@
 #include <iostream>
 #include <random>
 
+//TODO: utiliser assert plutot que exit
+
 namespace fa {
     class Transition;
 
@@ -26,6 +28,8 @@ namespace fa {
         bool final;
         int state;
         int dial;
+
+
 
     public:
 
@@ -52,7 +56,6 @@ namespace fa {
         int getDial() const;
 
         void setDial(int dial);
-
 
     };
 
@@ -252,7 +255,7 @@ namespace fa {
         /**
          * Print  the  automaton  in a friendly  way
          */
-        void prettyPrint(std::ostream &os) const;//TODO: ca marche pas.
+        void prettyPrint(std::ostream &os) const;
 
         /**
          * Print  the  automaton  with  respect  to the  DOT
@@ -383,11 +386,51 @@ namespace fa {
          */
         bool match(const std::string &word) const;
 
+
+        //*******************************************************
+        //                  Part 6
+        //*******************************************************
+
         /**
          * Create a deterministic  automaton  from  another
-         * possibly non -deterministic  automaton
+         * possibly non-deterministic  automaton
          */
         static Automaton createDeterministic(const Automaton &automaton);
+
+        static void createDeterministicRec(std::set<int> stateCollectionToAdd, fa::Automaton *newAutomaton,const fa::Automaton &automaton, int stateToAdd, std::set<int> *treatedState);
+
+        /**
+         * Tell if the  langage  accepted  by the  automaton  is
+         * included  in the  language  accepted  by the  other
+         * automaton
+         */
+        bool isIncludedIn(const Automaton &other) const;
+
+        //*******************************************************
+        //                  Part 7
+        //*******************************************************
+
+        /**
+         * Create  an  equivalent  minimal  automaton  with  the
+         * Moore  algorithm
+         *
+         * Expected  complexity: O(s n^2)
+        */
+        static Automaton createMinimalMoore(const Automaton &automaton);
+
+
+        //*******************************************************
+        //                  Part 8
+        //*******************************************************
+
+        /**
+         * Create  an  equivalent  automaton  with  the  epsilon
+         * transition  removed
+        */
+        static Automaton createWithoutEpsilon(const Automaton &automaton);
+
+        static void createWithoutEpsilonRec(fa::Automaton &automaton, StateConfiguration &state, fa::StateConfiguration &stateTo);
+
 
     };
 

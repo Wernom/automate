@@ -6,6 +6,7 @@ fa::StateConfiguration::StateConfiguration(int state) : state(state) {
     this->state = state;
     this->initial = false;
     this->final = false;
+    this->transition.empty();
 }
 
 bool fa::StateConfiguration::isInitial() const {
@@ -170,7 +171,7 @@ void fa::Automaton::addTransition(int from, char alpha, int to) {
 
 
 void fa::Automaton::addToAlphabet(char alpha) {
-    if (!((alpha >= 48 && alpha <= 57) || (alpha >= 65 && alpha <= 90) || (alpha >= 97 && alpha <= 122))) {
+    if (!(isprint(alpha) || alpha == '\0'))  {
         std::cerr << "Error: character ASCII: \"" << (int) alpha << "\" is not supported";
         exit(EXIT_FAILURE);
     }
@@ -189,14 +190,6 @@ void fa::Automaton::removeTransition(int from, char alpha, int to) {
     Transition trans(alpha, &cTo);
 
     this->stateCollection.find(from)->second.transition.erase(trans);
-
-//    auto it = this->stateCollection.find(from);
-//    auto itToErase = it->second.getTransition().find(Transition(alpha, &stateCollection.find(to)->second));
-//    StateConfiguration cTo(to);
-//    this->stateCollection.find(from)->second.getTransition().erase(Transition(alpha, &cTo));
-//
-//        std::cout << this->stateCollection.find(from)->second.getTransition().find(Transition(alpha, &stateCollection.find(to)->second))->getTransition_name() << std::endl;
-
 }
 
 std::size_t fa::Automaton::countTransitions() const {
@@ -260,8 +253,11 @@ void fa::Automaton::dotPrint(std::ostream &os) const {
         }
 
         for (Transition trans : state.second.transition) {
-            os << '\t' << state.second.getState() << "->" << trans.getTo()->getState() << " [ label = "
-               << trans.getTransition_name() << " ];\n";
+            if (trans.getTransition_name() == '\0')
+                os << '\t' << state.second.getState() << "->" << trans.getTo()->getState() << " [ label = NUL ];\n";
+            else
+                os << '\t' << state.second.getState() << "->" << trans.getTo()->getState() << " [ label = "
+                   << trans.getTransition_name() << " ];\n";
             hasTransition = true;
         }
 
@@ -277,7 +273,7 @@ bool fa::Automaton::isDeterministic() const {
         return true;
 
     for (std::pair<const int, StateConfiguration> state : this->stateCollection) {
-        char previousTransitionName = (char) NULL;
+        auto previousTransitionName = (char) NULL;
         for (Transition trans : state.second.transition) {
             if (previousTransitionName == trans.getTransition_name()) {
                 return false;
@@ -295,7 +291,7 @@ bool fa::Automaton::isComplete() const {
         return true;
 
     for (std::pair<const int, StateConfiguration> state : this->stateCollection) {
-        char previousTransitionName = (char) NULL;
+        auto previousTransitionName = (char) NULL;
         size_t countLetter = 0;
         for (Transition trans : state.second.transition) {
             if (previousTransitionName == trans.getTransition_name()) {
@@ -354,7 +350,11 @@ void fa::Automaton::makeComplete() {
 
 }
 
-void fa::Automaton::makeComplement() {//TODO: doit etre deterministe + complet
+void fa::Automaton::makeComplement() {
+    if (this->isDeterministic() && this->isComplete()){
+        std::cerr << "The automaton must be deterministic and complete." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     for (auto &data : this->stateCollection) {
         data.second.setFinal(!data.second.isFinal());
@@ -484,7 +484,7 @@ fa::Automaton fa::Automaton::createProduct(const fa::Automaton &lhs, const fa::A
         return res;
     }
     std::set<int> newState;
-    int stateAmountProcuct = (int) (rhs.countStates() * lhs.countStates());
+    auto stateAmountProcuct = (int) (rhs.countStates() * lhs.countStates());
 
     for (auto stateLhs : lhs.getInitialState()) {
         for (auto stateRhs : rhs.getInitialState()) {
@@ -605,6 +605,152 @@ bool fa::Automaton::match(const std::string &word) const {
     std::set<int> res = readString(word);
     return !res.empty();
 }
+
+fa::Automaton fa::Automaton::createDeterministic(const fa::Automaton &automaton) {
+    if (automaton.isDeterministic())
+        return automaton;
+
+    fa::Automaton newAutomaton;
+    std::set <int> treatedState;
+    std::set<int> stateCollectionToAdd;
+    int newIndex = 0;
+    int newStateToAdd = 0;
+    bool isFinal = false;
+    for (int state : automaton.initialState){
+        newStateToAdd += state * (int)pow(10, newIndex);
+        newIndex++;
+        if (automaton.getStateCollection().find(state)->second.isFinal())
+            isFinal = true;
+        stateCollectionToAdd.insert(state);
+    }
+
+    newAutomaton.addState(newStateToAdd);
+    newAutomaton.setStateInitial(newStateToAdd);
+    if (isFinal)
+        newAutomaton.setStateFinal(newStateToAdd);
+
+    createDeterministicRec(stateCollectionToAdd, &newAutomaton, automaton, newStateToAdd, &treatedState);
+
+    return newAutomaton;
+}
+
+void fa::Automaton::createDeterministicRec(std::set<int> stateCollectionToAdd, fa::Automaton *newAutomaton, const fa::Automaton &automaton, int stateToAdd, std::set<int> *treatedState) {
+    std::cout << "-> " << stateToAdd << std::endl;
+    if(treatedState->find(stateToAdd) != treatedState->end()){
+        std::cout << "state skip: " << stateToAdd << std::endl;
+        std::cout << "<-" << std::endl;
+        return;
+    }
+    treatedState->insert(stateToAdd);
+    std::multimap<char, int> newTransition;
+
+    //get the transition to add
+    for (auto state : stateCollectionToAdd){
+        for (auto trans : automaton.stateCollection.find(state)->second.transition){
+            newTransition.insert(std::pair<char, int>(trans.getTransition_name(),trans.getTo()->getState()));
+        }
+
+    }
+
+    int newIndex = 0;
+    int newStateToAdd = 0;
+    bool final = false;
+    bool hasTransition = false;
+    std::set<int> newStateCollectionToAdd;
+    char lastTransition = newTransition.begin()->first;
+    for (auto transToAdd : newTransition){
+        hasTransition = true;
+        std::cout << "transistion: " << transToAdd.first << std::endl;
+        if(lastTransition != transToAdd.first){
+            if(newAutomaton->stateCollection.find(newStateToAdd) == newAutomaton->stateCollection.end()){
+                std::cout << "state added: "  << newStateToAdd << std::endl;
+                newAutomaton->addState(newStateToAdd);
+
+                if(final)
+                    newAutomaton->setStateFinal(newStateToAdd);
+
+                createDeterministicRec(newStateCollectionToAdd, newAutomaton, automaton, newStateToAdd, treatedState);
+            }
+            std::cout << "Transistion added: " << stateToAdd << " -> " << lastTransition << " -> " << newStateToAdd <<std::endl;
+            newAutomaton->addTransition(stateToAdd, lastTransition, newStateToAdd);
+            newIndex = 0;
+            newStateToAdd = 0;
+            newStateCollectionToAdd.clear();
+        }
+
+        if(automaton.stateCollection.find(transToAdd.second)->second.isFinal())
+            final = true;
+
+        newStateToAdd += transToAdd.second * (int)pow(10, newIndex);
+        newIndex++;
+        lastTransition = transToAdd.first;
+        newStateCollectionToAdd.insert(transToAdd.second);
+    }
+
+    if (hasTransition){
+        if(newAutomaton->stateCollection.find(newStateToAdd) == newAutomaton->stateCollection.end()){
+            std::cout << "state added: "  << newStateToAdd << std::endl;
+            newAutomaton->addState(newStateToAdd);
+
+            if(final)
+                newAutomaton->setStateFinal(newStateToAdd);
+
+            createDeterministicRec(newStateCollectionToAdd, newAutomaton, automaton, newStateToAdd, treatedState);
+        }
+        std::cout << "Transistion added: " << stateToAdd << " -> " << lastTransition << " -> " << newStateToAdd <<std::endl;
+        newAutomaton->addTransition(stateToAdd, lastTransition, newStateToAdd);
+        newStateCollectionToAdd.clear();
+    }
+
+    std::cout << "<-" << std::endl;
+}
+
+bool fa::Automaton::isIncludedIn(const fa::Automaton &other) const {
+    fa::Automaton aer = *this;
+    fa::Automaton otherCpy = other;
+    otherCpy.makeComplement();
+
+    return fa::Automaton::createProduct(*this, otherCpy).isLanguageEmpty();
+}
+
+fa::Automaton fa::Automaton::createMinimalMoore(const fa::Automaton &automaton) {
+    return fa::Automaton();
+}
+
+fa::Automaton fa::Automaton::createWithoutEpsilon(const fa::Automaton &automaton) {
+
+    fa::Automaton res = automaton;
+    for (auto state : res.getStateCollection()){
+        for (auto transition : state.second.transition){
+            if (transition.getTransition_name() == '\0'){
+                res.removeTransition(state.second.getState(), '\0', transition.getTo()->getState());
+
+                if (transition.getTo()->isFinal())
+                    res.setStateFinal(state.first);
+
+                createWithoutEpsilonRec(res, state.second, *transition.getTo());
+            }
+        }
+    }
+
+
+    return res;
+}
+
+void fa::Automaton::createWithoutEpsilonRec(fa::Automaton &automaton, fa::StateConfiguration &stateRemoveEpsilon, fa::StateConfiguration &stateTo) {
+    std::cout << "state: " << stateTo.getState() << std::endl;
+    if (stateTo.getState() == stateRemoveEpsilon.getState())
+        return;
+
+    for (auto transition : stateTo.transition){
+        if (transition.getTransition_name() == '\0'){
+            createWithoutEpsilonRec(automaton, stateRemoveEpsilon, *transition.getTo());
+        }else{
+            automaton.addTransition(stateRemoveEpsilon.getState(), transition.getTransition_name(), transition.getTo()->getState());
+        }
+    }
+}
+
 
 
 //******************************************************************

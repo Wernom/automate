@@ -4,6 +4,8 @@
 #include "gtest/gtest.h"
 #include "Automaton.h"
 
+//TODO: faire un test de démonstration
+
 #define DOT_PRINT(automaton, fileName, nameOfStream)\
     std::ofstream nameOfStream;\
     nameOfStream.open("../dot/" + fileName +".dot");\
@@ -898,6 +900,246 @@ TEST_F(AutomatonTestFixture, matchAutomatonNotCompleteNotDeterministic){
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.match("aaaaaaaaaaaaaaaaaaa"));
     EXPECT_FALSE(automatonNotCompleteNotDeterministic.match("hniure"));
 }
+
+//******************************************************
+//              createDeterministic
+//******************************************************
+
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomaton){
+    fa::Automaton res = fa::Automaton::createDeterministic(automaton);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomaton_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automaton);
+    EXPECT_TRUE(res.match("za0j"));
+//    EXPECT_FALSE(res.match(nullptr));
+    EXPECT_TRUE(res.match("za0"));
+    EXPECT_TRUE(res.match(""));
+    EXPECT_FALSE(res.match("za"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonCoAccessible){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonCoAccessible);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonCoAccessible_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonCoAccessible);
+    EXPECT_TRUE(res.match("aab"));
+    EXPECT_TRUE(res.match("a"));
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_FALSE(res.match(""));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonCompleteDeterministic){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonCompleteDeterministic);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonCompleteDeterministic_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonCompleteDeterministic);
+    EXPECT_TRUE(res.match("aab"));
+    EXPECT_TRUE(res.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_FALSE(res.match(""));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createDeterministicCompleteNotDeterministic){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonCompleteNotDeterministic);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterministicCompleteNotDeterministic_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonCompleteNotDeterministic);
+    EXPECT_TRUE(res.match("aab"));
+    EXPECT_TRUE(res.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_TRUE(res.match("aaaaaaaaaaaaaaaaa"));
+    EXPECT_TRUE(res.match("aa"));
+    EXPECT_FALSE(res.match(""));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonEmpty){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonEmpty);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonEmpty_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonEmpty);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonInutile){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonInutile);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonInutile_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonInutile);
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_TRUE(res.match("aaaaaaaaaaaaa"));
+    EXPECT_FALSE(res.match("aaabbbbbbbbbbbbbbbbb"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonNotCompleteDEterministic){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonNotCompleteDeterministic);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonNotCompleteDEterministic_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonNotCompleteDeterministic);
+    EXPECT_FALSE(res.match("aa"));
+    EXPECT_FALSE(res.match("aaaaaaaaaaaaaa"));
+    EXPECT_FALSE(res.match("aaaaaaaaaaaaaab"));
+    EXPECT_TRUE(res.match("abbbbbbbbbbbbbbbbb"));
+    EXPECT_TRUE(res.match("ab"));
+    EXPECT_TRUE(res.match("abaaaaaaaaaaaaaaa"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonNotCompleteNotDEterministic){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonNotCompleteNotDeterministic);
+    EXPECT_TRUE(res.isDeterministic());
+}
+
+TEST_F(AutomatonTestFixture, createDeterimisticAutomatonNotCompleteNotDEterministic_match){
+    fa::Automaton res = fa::Automaton::createDeterministic(automatonNotCompleteNotDeterministic);
+    EXPECT_TRUE(res.match("a"));
+    EXPECT_TRUE(res.match("aaaaaaaaaaaaaabaaaaaaa"));
+    EXPECT_TRUE(res.match("abb"));
+    EXPECT_TRUE(res.match("ab"));
+    EXPECT_FALSE(res.match("aaaaaaaaaaaaaaaaaaa"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+//******************************************************
+//              isIncludedIn
+//******************************************************
+
+
+//******************************************************
+//              createWithoutEpsilon
+//******************************************************
+
+TEST(AutomatonTest, createWithoutEpsilonAutomatonEpsilonTwoStateMatch){
+    fa::Automaton automatonEpsilonTwoState;
+    automatonEpsilonTwoState.addState(0);
+    automatonEpsilonTwoState.addState(1);
+    automatonEpsilonTwoState.setStateInitial(0);
+    automatonEpsilonTwoState.setStateFinal(1);
+    automatonEpsilonTwoState.addTransition(0, '\0', 1);
+    fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilonTwoState);
+    EXPECT_TRUE(res.match(""));
+}
+
+TEST(AutomatonTest, createWithoutEpsilonAutomatonEpsilonTwoStateCount){
+    fa::Automaton automatonEpsilonTwoState;
+    automatonEpsilonTwoState.addState(0);
+    automatonEpsilonTwoState.addState(1);
+    automatonEpsilonTwoState.setStateInitial(0);
+    automatonEpsilonTwoState.setStateFinal(1);
+    automatonEpsilonTwoState.addTransition(0, '\0', 1);
+    fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilonTwoState);
+    EXPECT_EQ((unsigned) 2, res.countStates());
+}
+
+TEST(AutomatonTest, createWithoutEpsilonAutomatonEpsiloBoucleEpsilonMatchn){
+    fa::Automaton automatonEpsilon;
+    automatonEpsilon.addState(0);
+    automatonEpsilon.addState(1);
+    automatonEpsilon.addState(2);
+    automatonEpsilon.addState(3);
+    automatonEpsilon.addState(4);
+    automatonEpsilon.addState(5);
+    automatonEpsilon.addState(6);
+    automatonEpsilon.addState(7);
+    automatonEpsilon.addState(8);
+    automatonEpsilon.setStateInitial(0);
+    automatonEpsilon.setStateInitial(2);
+    automatonEpsilon.setStateInitial(8);
+    automatonEpsilon.setStateFinal(2);
+    automatonEpsilon.setStateFinal(3);
+    automatonEpsilon.setStateFinal(7);
+    automatonEpsilon.addTransition(0, 'o', 1);
+    automatonEpsilon.addTransition(0, 'a', 0);
+    automatonEpsilon.addTransition(0, '\0', 1);
+    automatonEpsilon.addTransition(0, 'u', 8);
+    automatonEpsilon.addTransition(0, (char) 122, 8);
+    automatonEpsilon.addTransition(1, '\0', 4);
+    automatonEpsilon.addTransition(1, '\0', 5);
+    automatonEpsilon.addTransition(3, '7', 1);
+    automatonEpsilon.addTransition(8, 'v', 1);
+    automatonEpsilon.addTransition(5, '\0', 0);
+    automatonEpsilon.addTransition(5, '0', 7);
+    automatonEpsilon.addTransition(7, 'j', 2);
+    automatonEpsilon.addTransition(3, 'o', 1);
+    automatonEpsilon.addTransition(3, 'j', 7);
+    fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilon);
+    DOT_PRINT(automatonEpsilon, std::string("res"), ofstream)
+    DOT_PRINT(res, std::string("res123"), ofstream1)
+
+
+    EXPECT_TRUE(res.match("0j"));
+    EXPECT_TRUE(res.match("0"));
+    EXPECT_TRUE(res.match(""));
+    EXPECT_FALSE(res.match("za"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+TEST(AutomatonTest, createWithoutEpsilonAutomatonEpsilomatch){
+    fa::Automaton automatonEpsilon;
+    automatonEpsilon.addState(0);
+    automatonEpsilon.addState(1);
+    automatonEpsilon.addState(2);
+    automatonEpsilon.addState(3);
+    automatonEpsilon.addState(4);
+    automatonEpsilon.addState(5);
+    automatonEpsilon.addState(6);
+    automatonEpsilon.addState(7);
+    automatonEpsilon.addState(8);
+    automatonEpsilon.setStateInitial(0);
+    automatonEpsilon.setStateInitial(2);
+    automatonEpsilon.setStateInitial(8);
+    automatonEpsilon.setStateFinal(2);
+    automatonEpsilon.setStateFinal(3);
+    automatonEpsilon.setStateFinal(7);
+    automatonEpsilon.addTransition(0, 'o', 1);
+    automatonEpsilon.addTransition(0, 'a', 0);
+    automatonEpsilon.addTransition(0, '\0', 1);
+    automatonEpsilon.addTransition(0, 'u', 8);
+    automatonEpsilon.addTransition(0, (char) 122, 8);
+    automatonEpsilon.addTransition(1, '\0', 4);
+    automatonEpsilon.addTransition(1, '\0', 5);
+    automatonEpsilon.addTransition(3, '7', 1);
+    automatonEpsilon.addTransition(8, 'v', 1);
+    automatonEpsilon.addTransition(5, 'P', 0);
+    automatonEpsilon.addTransition(5, '0', 7);
+    automatonEpsilon.addTransition(7, 'j', 2);
+    automatonEpsilon.addTransition(3, 'o', 1);
+    automatonEpsilon.addTransition(3, 'j', 7);
+    fa::Automaton res = fa::Automaton::createWithoutEpsilon(automatonEpsilon);
+    DOT_PRINT(automatonEpsilon, std::string("res"), ofstream)
+    DOT_PRINT(res, std::string("res123"), ofstream1)
+
+
+    EXPECT_TRUE(res.match("0j"));
+    EXPECT_TRUE(res.match("0"));
+    EXPECT_TRUE(res.match("PoPuvO"));
+    EXPECT_TRUE(res.match(""));
+    EXPECT_FALSE(res.match("za"));
+    EXPECT_FALSE(res.match("hniure"));
+}
+
+
+
+
+
 
 
 
